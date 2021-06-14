@@ -1,0 +1,83 @@
+>>>>New Pins:
+
+Name	  Full Name					Direction
+
+VPA		= Valid Program Address		Output
+VDA		= Valid Data Address		Output
+VSA		= Valid Stack Address		Output
+VBA		= Valid Base Page Address	Output
+VVA		= Valid Vector Address		Output
+ABT		= Abort Instruction			Input
+
+Function:
+
+VVA	VBA	VSA	VDA	VPA
+0	0	0	0	0	Internal Operation
+0	0	0	0	1	Opcode Fetch
+0	0	0	1	1	Operand Fetch
+0	0	0	1	0	Normal Data Read/Write
+0	1	0	1	0	Base Page Read/Write
+0	0	1	1	0	Stack Read/Write
+1	0	1	1	0	RESET/ABT/NMI/IRQ/BRK Stack Write or RTI Stack Read
+1	0	0	1	0	Vector Read
+
+
+Abort:
+a Falling Edge will cause the current Instruction to stop executing at the next Falling Edge of CLK, forcing the Cycle Counter to 0 and running an Interrupt Sequence using the ABORT Vector.
+Any Interrupt that was captured during the Instruction will be completely discarded.
+
+RTN #: Get Return Address from SP + # (Low) and SP + # + 1 (High)
+
+
+.								C cleared			C set
+
+ADC -> A = A + M + C			A = A + M			A = A + M + 1
+SBC -> A = A - M - (C - 1)		A = A - M - 1		A = A - M
+
+ICC -> M = M + C				M = M				M = M + 1
+DCC -> M = M - (C - 1)			M = M - 1			M = M
+
+
+SEC
+ICC NUM_LOW
+ICC NUM_HIGH
+
+CLC
+DCC NUM_LOW
+DCC NUM_HIGH
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,172 @@
+00 	- ABSOLUTELY NOTHING
+01 	- Add into PC from (PC - 1) and TBL; ----END
+02 	- Add into PC from (PC - 1); ----END
+03 	- Check <bit> from (BL/B), Jump to 5. if set
+04 	- Check <bit>, Jump to 5. if set
+05 	- Do an <ALU> Operation with A and (BL/B); ----END
+06 	- Do an <ALU> Operation with A and (BL/B+X); ----END
+07 	- Do an <ALU> Operation with A and (PC - 1); ----END
+08 	- Do an <ALU> Operation with A and (SP + 1)
+09 	- Do an <ALU> Operation with A and (SP + 1); ----END
+0A 	- Do an <ALU> Operation with A and (TA); ----END
+0B 	- Do an <ALU> Operation with A and (TA+X); ----END
+0C 	- Do an <ALU> Operation with A and (TA+Y); ----END
+0D 	- Do an <ALU> Operation with A and (TA+Z); ----END
+0E 	- Do an <ALU> Operation with A and A; ----SK0
+0F 	- Do an <ALU> Operation with A and INSEL; Load into A from !A; ----SK0
+10	- Do an <ALU> Operation with A and INSEL; Load into A from LFSR; ----SK0
+11	- Do an <ALU> Operation with A and INSEL; Load into A from SWP A; ----SK0
+12	- Do an <ALU> Operation with X and (BL/B); ----END
+13	- Do an <ALU> Operation with X and (PC - 1); ----END
+14	- Do an <ALU> Operation with X and (TA); ----END
+15	- Do an <ALU> Operation with Y and (BL/B); ----END
+16	- Do an <ALU> Operation with Y and (PC - 1); ----END
+17	- Do an <ALU> Operation with Y and (TA); ----END
+18	- Do an <ALU> Operation with Z and (BL/B); ----END
+19	- Do an <ALU> Operation with Z and (PC - 1); ----END
+1A	- Do an <ALU> Operation with Z and (TA); ----END
+1B	- Load into A from (SP + 1)
+1C	- Load into A from <ALU> given A and (BL/B); ----END
+1D	- Load into A from <ALU> given A and (BL/B+X); ----END
+1E	- Load into A from <ALU> given A and (PC - 1); ----END
+1F	- Load into A from <ALU> given A and (SP + 1)
+20	- Load into A from <ALU> given A and (SP+Y); ----END
+21	- Load into A from <ALU> given A and (TA); ----END
+22	- Load into A from <ALU> given A and (TA+X); ----END
+23	- Load into A from <ALU> given A and (TA+Y); ----END
+24	- Load into A from <ALU> given A and (TA+Z); ----END
+25	- Load into A from <ALU> given A and A; ----SK0
+26	- Load into A from <ALU> given A and B; ----SK0
+27	- Load into A from <ALU> given A and X; ----SK0
+28	- Load into A from <ALU> given A and Y; ----SK0
+29	- Load into A from <ALU> given A and Z; ----SK0
+2A	- Load into B from (SP + 2)
+2B	- Load into B from A; ----SK0
+2C	- Load into PC from (PC - 1) and TBL; ----END
+2D	- Load into PC from (SP + 2) and TBL (+ 1)
+2E	- Load into PC from (SP + 3) and TBL
+2F	- Load into PC from (SP+TAL + 2) and TBL (+ 1)
+30	- Load into PC from (TA + 1) and TBL; ----END
+31	- Load into PC from (TA+X + 1) and TBL; ----END
+32	- Load into PC from (VECTOR + 1) and TBL; ----END
+33	- Load into SPH from Y; ----SK0
+34	- Load into SPL from X; ----SK0
+35	- Load into TAH from (BL/B + 1)
+36	- Load into TAH from (BL/B+X + 1)
+37	- Load into TAH from (PC - 1)
+38	- Load into TAH from (SP+TBL + 2)
+39	- Load into TAL from (BL/B)
+3A	- Load into TAL from (BL/B+X)
+3B	- Load into TAL from (PC - 1)
+3C	- Load into TAL from (PC - 2)
+3D	- Load into TAL from (SP+TBL + 1)
+3E	- Load into TBH from (PC - 1)
+3F	- Load into TBH from (TA + 1)
+40	- Load into TBL from (BL/A) (MLB)
+41	- Load into TBL from (PC - 1)
+42	- Load into TBL from (PC - 2)
+43	- Load into TBL from (SP + 1)
+44	- Load into TBL from (SP + 2)
+45	- Load into TBL from (SP+TAL + 1)
+46	- Load into TBL from (TA)
+47	- Load into TBL from (TA) (MLB)
+48	- Load into TBL from (TA+X)
+49	- Load into TBL from <ALU> given A and (BL/A) (MLB)
+4A	- Load into TBL from <ALU> given A and (BL/A+X) (MLB)
+4B	- Load into TBL from <ALU> given A and (TA) (MLB)
+4C	- Load into TBL from <ALU> given A and (TA+X) (MLB)
+4D	- Load into TBL/TBH from <ALU> given A and (BL/A + 1) (MLB)
+4E	- Load into TBL/TBH from <ALU> given A and (TA + 1) (MLB)
+4F	- Load into X from (SP + 3)
+50	- Load into X from <ALU> given A and (BL/B); ----END
+51	- Load into X from <ALU> given A and (BL/B+Y); ----END
+52	- Load into X from <ALU> given A and (PC - 1); ----END
+53	- Load into X from <ALU> given A and (SP + 1)
+54	- Load into X from <ALU> given A and (TA); ----END
+55	- Load into X from <ALU> given A and (TA+Y); ----END
+56	- Load into X from <ALU> given A and A; ----SK0
+57	- Load into X from <ALU> given A and SPL; ----SK0
+58	- Load into X from <ALU> given A and X; ----SK0
+59	- Load into X from TBL; ----SK0
+5A	- Load into Y from (SP + 4)
+5B	- Load into Y from <ALU> given A and (BL/B); ----END
+5C	- Load into Y from <ALU> given A and (BL/B+X); ----END
+5D	- Load into Y from <ALU> given A and (PC - 1); ----END
+5E	- Load into Y from <ALU> given A and (SP + 1)
+5F	- Load into Y from <ALU> given A and (TA); ----END
+60	- Load into Y from <ALU> given A and (TA+X); ----END
+61	- Load into Y from <ALU> given A and A; ----SK0
+62	- Load into Y from <ALU> given A and SPH; ----SK0
+63	- Load into Y from <ALU> given A and Y; ----SK0
+64	- Load into Y from TBL; ----SK0
+65	- Load into Y from X; Load into TBL from Y
+66	- Load into Z from (SP + 5)
+67	- Load into Z from <ALU> given A and (PC - 1); ----END
+68	- Load into Z from <ALU> given A and (SP + 1)
+69	- Load into Z from <ALU> given A and (TA); ----END
+6A	- Load into Z from <ALU> given A and (TA+X); ----END
+6B	- Load into Z from <ALU> given A and A; ----SK0
+6C	- Load into Z from <ALU> given A and Z; ----SK0
+6D	- Load into Z from X; Load into TBL from Z
+6E	- Load into Z from Y; Load into TBL from Z
+6F	- SK0
+70	- SP = SP + 1; ----SK0
+71	- SP = SP + 2; ----SK0
+72	- SP = SP + 3; ----SK0
+73	- SP = SP + 5; ----SK0
+74	- SP = SP - 1; ----SK0
+75	- SP = SP - 2; ----SK0
+76	- SP = SP - 2; Load into TBL from (PC - 2)
+77	- SP = SP - 2; Load into TBL from (TA)
+78	- SP = SP - 2; Load into TBL from (TA+X)
+79	- SP = SP - 3; Load into TBL from (VECTOR)
+7A	- SP = SP - 5; ----SK0
+7B	- SP = SP+TAL + 2; ----SK0
+7C	- WAIT
+7D	- Write into (BL/A + 1) from TBH; ----END (MLB)
+7E	- Write into (BL/A) from TBL (MLB)
+7F	- Write into (BL/A) from TBL; ----END (MLB)
+80	- Write into (BL/A+X) from TBL; ----END (MLB)
+81	- Write into (BL/B) from A; ----END
+82	- Write into (BL/B) from X; ----END
+83	- Write into (BL/B) from Y; ----END
+84	- Write into (BL/B) from Z; ----END
+85	- Write into (BL/B+X) from A; ----END
+86	- Write into (BL/B+X) from Y; ----END
+87	- Write into (BL/B+X) from Z; ----END
+88	- Write into (BL/B+Y) from X; ----END
+89	- Write into (SP - 1) from PCL
+8A	- Write into (SP - 1) from PCL - 1
+8B	- Write into (SP - 1) from TBL
+8C	- Write into (SP - 1) from Y
+8D	- Write into (SP - 2) from P
+8E	- Write into (SP - 2) from X
+8F	- Write into (SP - 3) from B
+90	- Write into (SP - 4) from A
+91	- Write into (SP) from A
+92	- Write into (SP) from P
+93	- Write into (SP) from PCH
+94	- Write into (SP) from PCH - 1
+95	- Write into (SP) from TBH
+96	- Write into (SP) from X
+97	- Write into (SP) from Y
+98	- Write into (SP) from Z
+99	- Write into (SP+Y) from A; ----END
+9A	- Write into (TA + 1) from TBH; ----END (MLB)
+9B	- Write into (TA) from A; ----END
+9C	- Write into (TA) from TBL (MLB)
+9D	- Write into (TA) from TBL; ----END (MLB)
+9E	- Write into (TA) from X; ----END
+9F	- Write into (TA) from Y; ----END
+A0	- Write into (TA) from Z; ----END
+A1	- Write into (TA+X) from A; ----END
+A2	- Write into (TA+X) from TBL; ----END (MLB)
+A3	- Write into (TA+X) from Y; ----END
+A4	- Write into (TA+X) from Z; ----END
+A5	- Write into (TA+Y) from A; ----END
+A6	- Write into (TA+Y) from X; ----END
+A7	- Write into (TA+Z) from A; ----END
+A8	- Write into (SP - 2) from P (B Set)
+A9	- Load into PC from (VECTOR + 1) and TBL; CLR_INT; END
+AA	- Load into A from <ALU> given A and (PC+XY); END
+AB	- Write into (PC+XY) from A; END

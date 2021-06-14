@@ -1,0 +1,1095 @@
+000 - BRK s
+2. Write into (SP) from PCH
+3. Write into (SP - 1) from PCL
+4. Write into (SP - 2) from P
+5. SP = SP - 3; Load into TBL from (VECTOR)
+6. Load into PC from (VECTOR + 1) and TBL; END
+7. x
+8. x
+001 - NOP
+2. SK0 END
+3. x
+4. x
+5. x
+6. x
+7. x
+8. x
+002 - CLE/SEE/CLC/SEC/CLI/SEI/CLV/CLD/SED
+2. Do an <ALU> Operation with A and A; SK0 END
+3. x
+4. x
+5. x
+6. x
+7. x
+8. x
+003 - JSR a
+2. Write into (SP) from PCH - 1
+3. Write into (SP - 1) from PCL - 1
+4. SP = SP - 2; Load into TBL from (PC - 2)
+5. Load into PC from (PC - 1) and TBL; END
+6. x
+7. x
+8. x
+004 - JSR (a)
+2. Load into TAL from (PC - 2)
+3. Load into TAH from (PC - 1)
+4. Write into (SP) from PCH - 1
+5. Write into (SP - 1) from PCL - 1
+6. SP = SP - 2; Load into TBL from (TA)
+7. Load into PC from (TA + 1) and TBL; END
+8. x
+005 - JSR (a,x)
+2. Load into TAL from (PC - 2)
+3. Load into TAH from (PC - 1)
+4. Write into (SP) from PCH - 1
+5. Write into (SP - 1) from PCL - 1
+6. SP = SP - 2; Load into TBL from (TA+X)
+7. Load into PC from (TA+X + 1) and TBL; END
+8. x
+006 - BSR rr
+2. Write into (SP) from PCH - 1
+3. Write into (SP - 1) from PCL - 1
+4. SP = SP - 2; Load into TBL from (PC - 2)
+5. Add into PC from (PC - 1) and TBL; END
+6. x
+7. x
+8. x
+007 - RTI s
+2. Do an <ALU> Operation with A and (SP + 1)
+3. Load into TBL from (SP + 2)
+4. Load into PC from (SP + 3) and TBL
+5. SP = SP + 3; SK0 END
+6. x
+7. x
+8. x
+008 - RTS s
+2. Load into TBL from (SP + 1)
+3. Load into PC from (SP + 2) and TBL (+ 1)
+4. SP = SP + 2; SK0 END
+5. x
+6. x
+7. x
+8. x
+009 - RTN #
+2. Load into TAL from (PC - 1)
+3. Load into TBL from (SP+TAL + 1)
+4. Load into PC from (SP+TAL + 2) and TBL (+ 1)
+5. SP = SP+TAL + 2; SK0 END
+6. x
+7. x
+8. x
+010 - JMP a
+2. Load into TBL from (PC - 2)
+3. Load into PC from (PC - 1) and TBL; END
+4. x
+5. x
+6. x
+7. x
+8. x
+011 - JMP (a)
+2. Load into TAL from (PC - 2)
+3. Load into TAH from (PC - 1)
+4. Load into TBL from (TA)
+5. Load into PC from (TA + 1) and TBL; END
+4. x
+5. x
+6. x
+7. x
+8. x
+012 - JMP (a,x)
+2. Load into TAL from (PC - 2)
+3. Load into TAH from (PC - 1)
+4. Load into TBL from (TA+X)
+7. Load into PC from (TA+X + 1) and TBL; END
+8. x
+013 - BRA r
+2. Add into PC from (PC - 1); END
+3. x
+4. x
+5. x
+6. x
+7. x
+8. x
+014 - BRA rr
+2. Load into TBL from (PC - 2)
+3. Add into PC from (PC - 1) and TBL; END
+4. x
+5. x
+6. x
+7. x
+8. x
+015 - BPL/BCC/BNE/BVC r
+2. Check <bit>, Jump to 5. if set
+3. Add into PC from (PC - 1); END
+4. x
+5. SK0 END
+6. x
+7. x
+8. x
+016 - BMI/BCS/BEQ/BVS r
+2. Check <bit>, Jump to 5. if set
+3. SK0 END
+4. x
+5. Add into PC from (PC - 1); END
+6. x
+7. x
+8. x
+017 - BPL/BCC/BNE/BVC rr
+2. Check <bit>, Jump to 5. if set
+3. Load into TBL from (PC - 2)
+4. Add to PC (PC - 1) and TBL; END
+5. SK0 END
+6. x
+7. x
+8. x
+018 - BMI/BCS/BEQ/BVS rr
+2. Check <bit>, Jump to 5. if set
+3. SK0 END
+4. x
+5. Load into TBL from (PC - 2)
+6. Add to PC (PC - 1) and TBL; END
+7. x
+8. x
+019 - BBR bp, r
+2. Load into TBL from (PC - 2)
+3. Check <bit> from (BL/B), Jump to 5. if set
+4. Add into PC from (PC - 1); END
+5. SK0 END
+6. x
+7. x
+8. x
+020 - BBS bp, r
+2. Load into TBL from (PC - 2)
+3. Check <bit> from (BL/B), Jump to 5. if set
+4. SK0 END
+5. Add into PC from (PC - 1); END
+6. x
+7. x
+8. x
+021 - NEG A
+2. Do an <ALU> Operation with A and INSEL; Load into A from !A; SK0 END
+3. x
+4. x
+5. x
+6. x
+7. x
+8. x
+022 - ORA/AND/XOR/ADC/LDA/SBC/MUL/MLH/MOD/DIV #
+2. Load into A from <ALU> given A and (PC - 1); END
+3. x
+4. x
+5. x
+6. x
+7. x
+8. x
+023 - ORA/AND/XOR/ADC/LDA/SBC/MUL/MLH/MOD/DIV bp
+2. Load into TBL from (PC - 1)
+3. Load into A from <ALU> given A and (BL/B); END
+4. x
+5. x
+6. x
+7. x
+8. x
+024 - ORA/AND/XOR/ADC/LDA/SBC/MUL/MLH/MOD/DIV bp,x
+2. Load into TBL from (PC - 1)
+3. Load into A from <ALU> given A and (BL/B+X); END
+4. x
+5. x
+6. x
+7. x
+8. x
+025 - ORA/AND/XOR/ADC/LDA/SBC/MUL/MLH/MOD/DIV a
+2. Load into TAL from (PC - 2)
+3. Load into TAH from (PC - 1)
+4. Load into A from <ALU> given A and (TA); END
+5. x
+6. x
+7. x
+8. x
+026 - ORA/AND/XOR/ADC/LDA/SBC/MUL/MLH/MOD/DIV a,x
+2. Load into TAL from (PC - 2)
+3. Load into TAH from (PC - 1)
+4. Load into A from <ALU> given A and (TA+X); END
+5. x
+6. x
+7. x
+8. x
+027 - ORA/AND/XOR/ADC/LDA/SBC/MUL/MLH/MOD/DIV a,y
+2. Load into TAL from (PC - 2)
+3. Load into TAH from (PC - 1)
+4. Load into A from <ALU> given A and (TA+Y); END
+5. x
+6. x
+7. x
+8. x
+028 - ORA/AND/XOR/ADC/LDA/SBC (bp,x)
+2. Load into TBL from (PC - 1)
+3. Load into TAL from (BL/B+X)
+4. Load into TAH from (BL/B+X + 1)
+5. Load into A from <ALU> given A and (TA); END
+6. x
+7. x
+8. x
+029 - ORA/AND/XOR/ADC/LDA/SBC (BL/B),y
+2. Load into TBL from (PC - 1)
+3. Load into TAL from (BL/B)
+4. Load into TAH from (BL/B + 1)
+5. Load into A from <ALU> given A and (TA+Y); END
+6. x
+7. x
+8. x
+030 - ORA/AND/XOR/ADC/LDA/SBC (BL/B),z
+2. Load into TBL from (PC - 1)
+3. Load into TAL from (BL/B)
+4. Load into TAH from (BL/B + 1)
+5. Load into A from <ALU> given A and (TA+Z); END
+6. x
+7. x
+8. x
+031 - LDA (d.SP),Y
+2. Load into TBL from (PC - 1)
+3. Load into TAL from (SP+TBL)
+4. Load into TAH from (SP+TBL + 1)
+5. Load into A from <ALU> given A and (TA+Y); END
+6. x
+7. x
+8. x
+032 - LDX #
+2. Load into X from <ALU> given A and (PC - 1); END
+3. x
+4. x
+5. x
+6. x
+7. x
+8. x
+033 - LDY #
+2. Load into Y from <ALU> given A and (PC - 1); END
+3. x
+4. x
+5. x
+6. x
+7. x
+8. x
+034 - LDZ #
+2. Load into Z from <ALU> given A and (PC - 1); END
+3. x
+4. x
+5. x
+6. x
+7. x
+8. x
+035 - LDX bp
+2. Load into TBL from (PC - 1)
+3. Load into X from <ALU> given A and (BL/B); END
+4. x
+5. x
+6. x
+7. x
+8. x
+036 - LDY bp
+2. Load into TBL from (PC - 1)
+3. Load into Y from <ALU> given A and (BL/B); END
+4. x
+5. x
+6. x
+7. x
+8. x
+037 - LDX bp,y
+2. Load into TBL from (PC - 1)
+3. Load into X from <ALU> given A and (BL/B+Y); END
+4. x
+5. x
+6. x
+7. x
+8. x
+038 - LDY bp,x
+2. Load into TBL from (PC - 1)
+3. Load into Y from <ALU> given A and (BL/B+X); END
+4. x
+5. x
+6. x
+7. x
+8. x
+039 - LDX a
+2. Load into TAL from (PC - 2)
+3. Load into TAH from (PC - 1)
+4. Load into X from <ALU> given A and (TA); END
+5. x
+6. x
+7. x
+8. x
+040 - LDY a
+2. Load into TAL from (PC - 2)
+3. Load into TAH from (PC - 1)
+4. Load into Y from <ALU> given A and (TA); END
+5. x
+6. x
+7. x
+8. x
+041 - LDZ a
+2. Load into TAL from (PC - 2)
+3. Load into TAH from (PC - 1)
+4. Load into Z from <ALU> given A and (TA); END
+5. x
+6. x
+7. x
+8. x
+042 - LDX a,y
+2. Load into TAL from (PC - 2)
+3. Load into TAH from (PC - 1)
+4. Load into X from <ALU> given A and (TA+Y); END
+5. x
+6. x
+7. x
+8. x
+043 - LDY a,x
+2. Load into TAL from (PC - 2)
+3. Load into TAH from (PC - 1)
+4. Load into Y from <ALU> given A and (TA+X); END
+5. x
+6. x
+7. x
+8. x
+044 - LDZ a,x
+2. Load into TAL from (PC - 2)
+3. Load into TAH from (PC - 1)
+4. Load into Z from <ALU> given A and (TA+X); END
+5. x
+6. x
+7. x
+8. x
+045 - STA (d.SP),Y
+2. Load into TBL from (PC - 1)
+3. Load into TAL from (SP+TBL)
+4. Load into TAH from (SP+TBL + 1)
+5. Write into (TA+Y) from A; END
+6. x
+7. x
+8. x
+046 - STA (bp,x)
+2. Load into TBL from (PC - 1)
+3. Load into TAL from (BL/B+X)
+4. Load into TAH from (BL/B+X + 1)
+5. Write into (TA) from A; END
+6. x
+7. x
+8. x
+047 - STA (BL/B),y
+2. Load into TBL from (PC - 1)
+3. Load into TAL from (BL/B)
+4. Load into TAH from (BL/B + 1)
+5. Write into (TA+Y) from A; END
+6. x
+7. x
+8. x
+048 - STA (BL/B),z
+2. Load into TBL from (PC - 1)
+3. Load into TAL from (BL/B)
+4. Load into TAH from (BL/B + 1)
+5. Write into (TA+Z) from A; END
+6. x
+7. x
+8. x
+049 - STA bp
+2. Load into TBL from (PC - 1)
+3. Write into (BL/B) from A; END
+4. x
+5. x
+6. x
+7. x
+8. x
+050 - STX bp
+2. Load into TBL from (PC - 1)
+3. Write into (BL/B) from X; END
+4. x
+5. x
+6. x
+7. x
+8. x
+051 - STY bp
+2. Load into TBL from (PC - 1)
+3. Write into (BL/B) from Y; END
+4. x
+5. x
+6. x
+7. x
+8. x
+052 - STZ bp
+2. Load into TBL from (PC - 1)
+3. Write into (BL/B) from Z; END
+4. x
+5. x
+6. x
+7. x
+8. x
+053 - STA bp,x
+2. Load into TBL from (PC - 1)
+3. Write into (BL/B+X) from A; END
+4. x
+5. x
+6. x
+7. x
+8. x
+054 - STX bp,y
+2. Load into TBL from (PC - 1)
+3. Write into (BL/B+Y) from X; END
+4. x
+5. x
+6. x
+7. x
+8. x
+055 - STY bp,x
+2. Load into TBL from (PC - 1)
+3. Write into (BL/B+X) from Y; END
+4. x
+5. x
+6. x
+7. x
+8. x
+056 - STZ bp,x
+2. Load into TBL from (PC - 1)
+3. Write into (BL/B+X) from Z; END
+4. x
+5. x
+6. x
+7. x
+8. x
+057 - STA a
+2. Load into TAL from (PC - 2)
+3. Load into TAH from (PC - 1)
+4. Write into (TA) from A; END
+5. x
+6. x
+7. x
+8. x
+058 - STX a
+2. Load into TAL from (PC - 2)
+3. Load into TAH from (PC - 1)
+4. Write into (TA) from X; END
+5. x
+6. x
+7. x
+8. x
+059 - STY a
+2. Load into TAL from (PC - 2)
+3. Load into TAH from (PC - 1)
+4. Write into (TA) from Y; END
+5. x
+6. x
+7. x
+8. x
+060 - STZ a
+2. Load into TAL from (PC - 2)
+3. Load into TAH from (PC - 1)
+4. Write into (TA) from Z; END
+5. x
+6. x
+7. x
+8. x
+061 - STA a,x
+2. Load into TAL from (PC - 2)
+3. Load into TAH from (PC - 1)
+4. Write into (TA+X) from A; END
+5. x
+6. x
+7. x
+8. x
+062 - STY a,x
+2. Load into TAL from (PC - 2)
+3. Load into TAH from (PC - 1)
+4. Write into (TA+X) from Y; END
+5. x
+6. x
+7. x
+8. x
+063 - STZ a,x
+2. Load into TAL from (PC - 2)
+3. Load into TAH from (PC - 1)
+4. Write into (TA+X) from Z; END
+5. x
+6. x
+7. x
+8. x
+064 - STA a,y
+2. Load into TAL from (PC - 2)
+3. Load into TAH from (PC - 1)
+4. Write into (TA+Y) from A; END
+5. x
+6. x
+7. x
+8. x
+065 - STX a,y
+2. Load into TAL from (PC - 2)
+3. Load into TAH from (PC - 1)
+4. Write into (TA+Y) from X; END
+5. x
+6. x
+7. x
+8. x
+066 - CMP/BIT #
+2. Do an <ALU> Operation with A and (PC - 1); END
+3. x
+4. x
+5. x
+6. x
+7. x
+8. x
+067 - CMP/BIT bp
+2. Load into TBL from (PC - 1)
+3. Do an <ALU> Operation with A and (BL/B); END
+4. x
+5. x
+6. x
+7. x
+8. x
+068 - CMP/BIT bp,x
+2. Load into TBL from (PC - 1)
+3. Do an <ALU> Operation with A and (BL/B+X); END
+4. x
+5. x
+6. x
+7. x
+8. x
+069 - CMP/BIT a
+2. Load into TAL from (PC - 2)
+3. Load into TAH from (PC - 1)
+4. Do an <ALU> Operation with A and (TA); END
+5. x
+6. x
+7. x
+8. x
+070 - CMP/BIT a,x
+2. Load into TAL from (PC - 2)
+3. Load into TAH from (PC - 1)
+4. Do an <ALU> Operation with A and (TA+X); END
+5. x
+6. x
+7. x
+8. x
+071 - CMP a,y
+2. Load into TAL from (PC - 2)
+3. Load into TAH from (PC - 1)
+4. Do an <ALU> Operation with A and (TA+Y); END
+5. x
+6. x
+7. x
+8. x
+072 - CMP (bp,x)
+2. Load into TBL from (PC - 1)
+3. Load into TAL from (BL/B+X)
+4. Load into TAH from (BP+X + 1)
+5. Do an <ALU> Operation with A and (TA); END
+6. x
+7. x
+8. x
+073 - CMP (BL/B),y
+2. Load into TBL from (PC - 1)
+3. Load into TAL from (BL/B)
+4. Load into TAH from (BP + 1)
+5. Do an <ALU> Operation with A and (TA+Y); END
+6. x
+7. x
+8. x
+074 - CMP (BL/B),z
+2. Load into TBL from (PC - 1)
+3. Load into TAL from (BL/B)
+4. Load into TAH from (BP + 1)
+5. Do an <ALU> Operation with A and (TA+Z); END
+6. x
+7. x
+8. x
+075 - CPX #
+2. Do an <ALU> Operation with X and (PC - 1); END
+3. x
+4. x
+5. x
+6. x
+7. x
+8. x
+076 - CPY #
+2. Do an <ALU> Operation with Y and (PC - 1); END
+3. x
+4. x
+5. x
+6. x
+7. x
+8. x
+077 - CPZ #
+2. Do an <ALU> Operation with Z and (PC - 1); END
+3. x
+4. x
+5. x
+6. x
+7. x
+8. x
+078 - CPX bp
+2. Load into TBL from (PC - 1)
+3. Do an <ALU> Operation with X and (BL/B); END
+4. x
+5. x
+6. x
+7. x
+8. x
+079 - CPY bp
+2. Load into TBL from (PC - 1)
+3. Do an <ALU> Operation with Y and (BL/B); END
+4. x
+5. x
+6. x
+7. x
+8. x
+080 - CPZ bp
+2. Load into TBL from (PC - 1)
+3. Do an <ALU> Operation with Z and (BL/B); END
+4. x
+5. x
+6. x
+7. x
+8. x
+081 - CPX a
+2. Load into TAL from (PC - 2)
+3. Load into TAH from (PC - 1)
+4. Do an <ALU> Operation with X and (TA); END
+5. x
+6. x
+7. x
+8. x
+082 - CPY a
+2. Load into TAL from (PC - 2)
+3. Load into TAH from (PC - 1)
+4. Do an <ALU> Operation with Y and (TA); END
+5. x
+6. x
+7. x
+8. x
+083 - CPZ a
+2. Load into TAL from (PC - 2)
+3. Load into TAH from (PC - 1)
+4. Do an <ALU> Operation with Z and (TA); END
+5. x
+6. x
+7. x
+8. x
+084 - ASL/ASR/LSR/ROL/ROR/INC/DEC/CHB/CBH A
+2. Load into A from <ALU> given A and A; SK0 END
+3. x
+4. x
+5. x
+6. x
+7. x
+8. x
+085 - ASL/ASR/LSR/ROL/ROR/TSB/TRB/RMB/SMB/INC/DEC/ICC/DCC bp
+2. Load into TAL from (PC - 1)
+3. Load into TBL from <ALU> given A and (BL/A) (MLB)
+4. Write into (BL/A) from TBL; END (MLB)
+5. x
+6. x
+7. x
+8. x
+086 - ASL/ASR/LSR/ROL/ROR//INC/DEC/ICC/DCC bp,x
+2. Load into TAL from (PC - 1)
+4. Load into TBL from <ALU> given A and (BL/A+X) (MLB)
+5. Write into (BL/A+X) from TBL; END (MLB)
+6. x
+7. x
+8. x
+087 - ASL/LSR/ROL/ROR/TSB/TRB/INC/DEC/ICC/DCC a
+2. Load into TAL from (PC - 2)
+3. Load into TAH from (PC - 1)
+4. Load into TBL from <ALU> given A and (TA) (MLB)
+5. Write into (TA) from TBL; END (MLB)
+6. x
+7. x
+8. x
+088 - ASL/LSR/ROL/ROR/INC/DEC/ICC/DCC a,x
+2. Load into TAL from (PC - 2)
+3. Load into TAH from (PC - 1)
+4. Load into TBL from <ALU> given A and (TA+X) (MLB)
+5. Write into (TA+X) from TBL; END (MLB)
+6. x
+7. x
+8. x
+089 - INW/DEW bp
+2. Load into TAL from (PC - 1)
+3. Load into TBL from (BL/A) (MLB)
+4. Load into TBL/TBH from <ALU> given A and (BL/A + 1) (MLB)
+5. Write into (BL/A) from TBL (MLB)
+6. Write into (BL/A + 1) from TBH; END (MLB)
+7. x
+8. x
+090 - AWL/AWR/LWR/RWL/RWR a
+2. Load into TAL from (PC - 2)
+3. Load into TAH from (PC - 1)
+4. Load into TBL from (TA) (MLB)
+5. Load into TBL/TBH from <ALU> given A and (TA + 1) (MLB)
+6. Write into (TA) from TBL (MLB)
+7. Write into (TA + 1) from TBH; END (MLB)
+8. x
+091 - PHP s
+2. Write into (SP) from P
+3. SP = SP - 1; SK0 END
+4. x
+5. x
+6. x
+7. x
+8. x
+092 - PHA s
+2. Write into (SP) from A
+3. SP = SP - 1; SK0 END
+4. x
+5. x
+6. x
+7. x
+8. x
+093 - PHX s
+2. Write into (SP) from X
+3. SP = SP - 1; SK0 END
+4. x
+5. x
+6. x
+7. x
+8. x
+094 - PHY s
+2. Write into (SP) from Y
+3. SP = SP - 1; SK0 END
+4. x
+5. x
+6. x
+7. x
+8. x
+095 - PHZ s
+2. Write into (SP) from Z
+3. SP = SP - 1; SK0 END
+4. x
+5. x
+6. x
+7. x
+8. x
+096 - PHW ##/s
+2. Load into TBL from (PC - 2)
+3. Load into TBH from (PC - 1)
+4. Write into (SP) from TBH
+5. Write into (SP - 1) from TBL
+6. SP = SP - 2; SK0 END
+7. x
+8. x
+097 - PHW a/s
+2. Load into TAL from (PC - 2)
+3. Load into TAH from (PC - 1)
+4. Load into TBL from (TA)
+5. Load into TBH from (TA + 1)
+6. Write into (SP) from TBH
+7. Write into (SP - 1) from TBL
+8. SP = SP - 2; SK0 END
+098 - PLP s
+2. Do an <ALU> Operation with A and (SP + 1)
+3. SP = SP + 1; SK0 END
+4. x
+5. x
+6. x
+7. x
+8. x
+099 - PLA s
+2. Load into A from <ALU> given A and (SP + 1)
+3. SP = SP + 1; SK0 END
+4. x
+5. x
+6. x
+7. x
+8. x
+100 - PLX s
+2. Load into X from <ALU> given A and (SP + 1)
+3. SP = SP + 1; SK0 END
+4. x
+5. x
+6. x
+7. x
+8. x
+101 - PLY s
+2. Load into Y from <ALU> given A and (SP + 1)
+3. SP = SP + 1; SK0 END
+4. x
+5. x
+6. x
+7. x
+8. x
+102 - PLZ s
+2. Load into Z from <ALU> given A and (SP + 1)
+3. SP = SP + 1; SK0 END
+4. x
+5. x
+6. x
+7. x
+8. x
+103 - INX
+2. Load into X from <ALU> given A and X; SK0 END
+3. x
+4. x
+5. x
+6. x
+7. x
+8. x
+104 - INY
+2. Load into Y from <ALU> given A and Y; SK0 END
+3. x
+4. x
+5. x
+6. x
+7. x
+8. x
+105 - INZ
+2. Load into Z from <ALU> given A and Z; SK0 END
+3. x
+4. x
+5. x
+6. x
+7. x
+8. x
+106 - DEX
+2. Load into X from <ALU> given A and X; SK0 END
+3. x
+4. x
+5. x
+6. x
+7. x
+8. x
+107 - DEY
+2. Load into Y from <ALU> given A and Y; SK0 END
+3. x
+4. x
+5. x
+6. x
+7. x
+8. x
+108 - DEZ
+2. Load into Z from <ALU> given A and Z; SK0 END
+3. x
+4. x
+5. x
+6. x
+7. x
+8. x
+109 - TAB
+2. Load into B from A; SK0 END
+3. x
+4. x
+5. x
+6. x
+7. x
+8. x
+110 - TAX
+2. Load into X from <ALU> given A and A; SK0 END
+3. x
+4. x
+5. x
+6. x
+7. x
+8. x
+111 - TAY
+2. Load into Y from <ALU> given A and A; SK0 END
+3. x
+4. x
+5. x
+6. x
+7. x
+8. x
+112 - TAZ
+2. Load into Z from <ALU> given A and A; SK0 END
+3. x
+4. x
+5. x
+6. x
+7. x
+8. x
+113 - TBA
+2. Load into A from <ALU> given A and B; SK0 END
+3. x
+4. x
+5. x
+6. x
+7. x
+8. x
+114 - TXA
+2. Load into A from <ALU> given A and X; SK0 END
+3. x
+4. x
+5. x
+6. x
+7. x
+8. x
+115 - TYA
+2. Load into A from <ALU> given A and Y; SK0 END
+3. x
+4. x
+5. x
+6. x
+7. x
+8. x
+116 - TZA
+2. Load into A from <ALU> given A and Z; SK0 END
+3. x
+4. x
+5. x
+6. x
+7. x
+8. x
+117 - TXS
+2. Load into SPL from X; SK0 END
+3. x
+4. x
+5. x
+6. x
+7. x
+8. x
+118 - TYS
+2. Load into SPH from Y; SK0 END
+3. x
+4. x
+5. x
+6. x
+7. x
+8. x
+119 - TSX
+2. Load into X from <ALU> given A and SPL; SK0 END
+3. x
+4. x
+5. x
+6. x
+7. x
+8. x
+120 - TSY
+2. Load into Y from <ALU> given A and SPH; SK0 END
+3. x
+4. x
+5. x
+6. x
+7. x
+8. x
+121 - AUG
+2. SK0 END
+3. x
+4. x
+5. x
+6. x
+7. x
+8. x
+122 - RND A
+2. Load into A from LFSR; SK0 END
+3. x
+4. x
+5. x
+6. x
+7. x
+8. x
+123 - SWP
+2. Load into A from SWP A; SK0 END
+3. x
+4. x
+5. x
+6. x
+7. x
+8. x
+124 - SXY
+2. Load into Y from X; Load into TBL from Y
+3. Load into X from TBL; SK0 END
+4. x
+5. x
+6. x
+7. x
+8. x
+125 - SXZ
+2. Load into Z from X; Load into TBL from Z
+3. Load into X from TBL; SK0 END
+4. x
+5. x
+6. x
+7. x
+8. x
+126 - SYZ
+2. Load into Z from Y; Load into TBL from Z
+3. Load into Y from TBL; SK0 END
+4. x
+5. x
+6. x
+7. x
+8. x
+127 - LDA sp,y
+2. Load into A from <ALU> given A and (SP+Y); END
+3. x
+4. x
+5. x
+6. x
+7. x
+8. x
+128 - STA sp,y
+2. Write into (SP+Y) from A; END
+3. x
+4. x
+5. x
+6. x
+7. x
+8. x
+129 - PHR s
+2. Write into (SP) from Z
+3. Write into (SP - 1) from Y
+4. Write into (SP - 2) from X
+5. Write into (SP - 3) from B
+6. Write into (SP - 4) from A
+7. SP = SP - 5; SK0 END
+8. x
+130 - PLR s
+2. Load into A from (SP + 1)
+3. Load into B from (SP + 2)
+4. Load into X from (SP + 3)
+5. Load into Y from (SP + 4)
+6. Load into Z from (SP + 5)
+7. SP = SP + 5; SK0 END
+8. x
+131 - WAI
+2. WAIT
+3. x
+4. x
+5. x
+6. x
+7. x
+8. x
+132 - STP
+2. Check <bit>, Jump to 5. if set
+3. x
+4. x
+5. Check <bit>, Jump to 5. if set
+6. x
+7. x
+8. x
+133 - LDA (bp,x),y
+2. Load into TBL from (PC - 1)
+3. Load into TAL from (BL/B+X)
+4. Load into TAH from (BL/B+X + 1)
+5. Load into A from <ALU> given A and (TA+Y); END
+6. x
+7. x
+8. x
+134 - STA (bp,x),y
+2. Load into TBL from (PC - 1)
+3. Load into TAL from (BL/B+X)
+4. Load into TAH from (BL/B+X + 1)
+5. Write into (TA) from A; END
+6. x
+7. x
+8. x
+135 - STA pc,xy
+2. Write into (PC+XY) from A; END
+3. x
+4. x
+5. x
+6. x
+7. x
+8. x
+136 - LDA pc,xy
+2. Load into A from <ALU> given A and (PC+XY); END
+3. x
+4. x
+5. x
+6. x
+7. x
+8. x

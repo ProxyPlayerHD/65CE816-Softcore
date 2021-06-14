@@ -1,0 +1,93 @@
+#include "CPU_65CE02.CPU"
+
+
+
+IO_SPACE = 0xDF00
+OUT = IO_SPACE + 0			; Terminal Output
+INP = IO_SPACE + 0			; Keyboard Input
+STT = IO_SPACE + 1			; Keyboard Status		(bit 0 = 1 => Data in Keyboard)
+
+
+#bankdef main
+{
+  #addr 0xFC00
+  #size 0x0400
+  #outp 0
+}
+
+IRQ_HANDLER:
+	PHR
+	PHW #IRQ_STR
+	JSR PRINT_STR
+	PLA		; Pull the data from the PHW from the stack
+	PLA
+	PLR
+RTI
+
+NMI_HANDLER:
+	PHR
+	PHW #NMI_STR
+	JSR PRINT_STR
+	PLA		; Pull the data from the PHW from the stack
+	PLA
+	PLR
+RTI
+
+ABT_HANDLER:
+	PHR
+	PHW #ABT_STR
+	JSR PRINT_STR
+	PLA		; Pull the data from the PHW from the stack
+	PLA
+	PLR
+RTI
+
+
+START:
+	PHW #HELLO_STR
+	JSR PRINT_STR
+	
+HLT
+
+
+
+PRINT_STR:
+	LDY #0x00
+	.LOOP:
+		LDA (0x02,SP),Y
+		BEQ .EXIT
+		STA OUT
+		INC Y
+	BNE .LOOP
+	.EXIT:
+RTS
+
+
+
+HELLO_STR:
+#d "Hello World!\n\0"
+
+IRQ_STR:
+#d " Interrupt Request! \0"
+
+NMI_STR:
+#d " Non-Maskable Interrupt! \0"
+
+ABT_STR:
+#d " Abort! \0"
+
+
+
+#addr 0xFFF8
+#d ABT_HANDLER[7:0]		; Abort Vector
+#d ABT_HANDLER[15:8]
+#d NMI_HANDLER[7:0]		; NMI Vector
+#d NMI_HANDLER[15:8]
+#d START[7:0]			; Reset Vector
+#d START[15:8]
+#d IRQ_HANDLER[7:0]		; IRQ/BRK Vector
+#d IRQ_HANDLER[15:8]
+
+
+
+

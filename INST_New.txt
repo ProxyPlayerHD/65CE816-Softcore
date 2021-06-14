@@ -1,0 +1,257 @@
+
+
+MUL/MLL	- "Multiply"/"Multiply Low" Multiplies A by a value from Memory, result (low byte) stored in A. (the Carry being 1 indicates that the High byte (aka MLH result) is not equal to 0)
+
+	N V S B D I Z C
+	+ - - - - - + +
+	
+	Opcode	Addressing		Mnemonic		Bytes	Cyles
+	-----------------------------------------------------
+	5C 09	Immediate		MUL #nn			2+1		2+1
+	5C 05	Base Page		MUL nn			2+1		3+1
+	5C 15	Base Page X		MUL nn,X		2+1		3+1
+	5C 0D	Absolute		MUL nnnn		3+1		4+1
+	5C 1D	Absolute X		MUL nnnn,X		3+1		4+1
+	5C 19	Absolute Y		MUL nnnn,Y		3+1		4+1
+
+
+MLH		- "Multiply High" Multiplies A by a value from Memory, result (high byte) stored in A (the Carry being 1 indicates that the Low byte (aka MLL result) is not equal to 0)
+
+	N V S B D I Z C
+	+ - - - - - + +
+	
+	Opcode	Addressing		Mnemonic		Bytes	Cyles
+	-----------------------------------------------------
+	5C 29	Immediate		MLH #nn			2+1		2+1
+	5C 25	Base Page		MLH nn			2+1		3+1
+	5C 35	Base Page X		MLH nn,X		2+1		3+1
+	5C 2D	Absolute		MLH nnnn		3+1		4+1
+	5C 3D	Absolute X		MLH nnnn,X		3+1		4+1
+	5C 39	Absolute Y		MLH nnnn,Y		3+1		4+1
+
+
+MOD		- Divides a value from Memory by A, remainder stored in A. (the Carry being 1 indicates that the High byte (aka DIV result) is not equal to 0)
+
+	N V S B D I Z C
+	+ - - - - - + +
+	
+	Opcode	Addressing		Mnemonic		Bytes	Cyles
+	-----------------------------------------------------
+	5C 49	Immediate		DIV #nn			2+1		2+1+?
+	5C 45	Base Page		DIV nn			2+1		3+1+?
+	5C 55	Base Page X		DIV nn,X		2+1		3+1+?
+	5C 4D	Absolute		DIV nnnn		3+1		4+1+?
+	5C 5D	Absolute X		DIV nnnn,X		3+1		4+1+?
+	5C 59	Absolute Y		MUL nnnn,Y		3+1		4+1+?
+
+
+DIV		- Divides a value from Memory by A, result stored in A (the Carry being 1 indicates that the Low byte (aka MOD result) is not equal to 0)
+
+	N V S B D I Z C
+	+ - - - - - + +
+	
+	Opcode	Addressing		Mnemonic		Bytes	Cyles
+	-----------------------------------------------------
+	5C 69	Immediate		DIV #nn			2+1		2+1+?
+	5C 65	Base Page		DIV nn			2+1		3+1+?
+	5C 75	Base Page X		DIV nn,X		2+1		3+1+?
+	5C 6D	Absolute		DIV nnnn		3+1		4+1+?
+	5C 7D	Absolute X		DIV nnnn,X		3+1		4+1+?
+	5C 79	Absolute Y		MUL nnnn,Y		3+1		4+1+?
+
+
+LWR		- "Logic shift Word Right", Shifts all bits 1 to the right, 0 into bit 15, and bit 0 into Carry
+
+	N V S B D I Z C
+	+ - - - - - + +
+	
+	Opcode	Addressing		Mnemonic		Bytes	Cyles
+	-----------------------------------------------------
+	5C CA	Absolute		LRW nnnn		3+1		7+1
+
+
+AWR		- "Arithmetic shift Word Right", Shifts all bits 1 to the right, bit 15 into bit 14, and bit 0 into Carry
+
+	N V S B D I Z C
+	+ - - - - - + +
+	
+	Opcode	Addressing		Mnemonic		Bytes	Cyles
+	-----------------------------------------------------
+	5C CB	Absolute		ARW nnnn		3+1		7+1
+
+
+RWR		- "Rorate Word Right", Shifts all bits 1 to the right, Carry into bit 15, and bit 0 into Carry
+
+	N V S B D I Z C
+	+ - - - - - + +
+	
+	Opcode	Addressing		Mnemonic		Bytes	Cyles
+	-----------------------------------------------------
+	5C EB	Absolute		RRW nnnn		3+1		7+1
+
+
+ICC		- "Increment with Carry", Adds 0 + C to a Value in Memory
+
+	N V S B D I Z C
+	+ - - - - - + +
+	
+	Opcode	Addressing		Mnemonic		Bytes	Cyles
+	-----------------------------------------------------
+	5C E6	Base Page		ICC nn			2+1		4+1
+	5C F6	Base Page X		ICC nn,X		2+1		4+1
+	5C EE	Absolute		ICC nnnn		3+1		5+1
+	5C FE	Absolute X		ICC nnnn,X		3+1		5+1
+
+
+DCC		- "Decrement with Carry", Subtracts 1 + C from a Value in Memory
+
+	N V S B D I Z C
+	+ - - - - - + +
+	
+	Opcode	Addressing		Mnemonic		Bytes	Cyles
+	-----------------------------------------------------
+	5C C6	Base Page		DCC nn			2+1		4+1
+	5C D6	Base Page X		DCC nn,X		2+1		4+1
+	5C CE	Absolute		DCC nnnn		3+1		5+1
+	5C DE	Absolute X		DCC nnnn,X		3+1		5+1
+
+
+SWP		- "Swap Nibble", Swaps the High and Low Nibble of the A Register.
+
+	N V S B D I Z C
+	- - - - - - - -
+	
+	Opcode	Addressing		Mnemonic		Bytes	Cyles
+	-----------------------------------------------------
+	5C 4B	Implied			SWN				1+1		1+1
+
+
+SXY		- "Swap X and Y", Swaps the contents of the X and Y Register.
+
+	N V S B D I Z C
+	- - - - - - - -
+	
+	Opcode	Addressing		Mnemonic		Bytes	Cyles
+	-----------------------------------------------------
+	5C 5B	Implied			SXY				1+1		2+1
+
+
+SXZ		- "Swap X and Z", Swaps the contents of the X and Z Register.
+
+	N V S B D I Z C
+	- - - - - - - -
+	
+	Opcode	Addressing		Mnemonic		Bytes	Cyles
+	-----------------------------------------------------
+	5C 6B	Implied			SXZ				1+1		2+1
+
+
+SYZ		- "Swap Y and Z", Swaps the contents of the Y and Z Register.
+
+	N V S B D I Z C
+	- - - - - - - -
+	
+	Opcode	Addressing		Mnemonic		Bytes	Cyles
+	-----------------------------------------------------
+	5C 7B	Implied			SYZ				1+1		2+1
+
+
+LDA		- Load Memory into Accumulator
+
+	N V S B D I Z C
+	+ - - - - - + -
+	
+	Opcode	Addressing		Mnemonic		Bytes	Cyles
+	-----------------------------------------------------
+	5C E2	Stack Y			LDA SP,Y		1+1		1+2
+	5C E1	Double Indirect	LDA (nn,X),Y	1+2		1+5
+	5C F1	PC Relative		LDA PC,XY		1+1		1+2
+
+
+STA		- Store Accumulator into Memory 
+
+	N V S B D I Z C
+	- - - - - - - -
+	
+	Opcode	Addressing		Mnemonic		Bytes	Cyles
+	-----------------------------------------------------
+	5C 82	Stack Y			STA SP,Y		1+1		1+2
+	5C 81	Double Indirect	STA (nn,X),Y	1+2		1+5
+	5C 91	PC Relative		STA PC,XY		1+1		1+2
+
+
+CHB		- "Convert Hex to BCD", Converts a Binary Value 0x00 - 0x63 to a BCD Value 0x00 - 0x99
+
+	N V S B D I Z C
+	+ - - - - - + +
+	
+	Opcode	Addressing		Mnemonic		Bytes	Cyles
+	-----------------------------------------------------
+	5C E8	Implied			CHB				1+1		1+1
+
+
+CBH		- "Convert BCD to Hex", Reverse of CBH
+
+	N V S B D I Z C
+	+ - - - - - + +
+	
+	Opcode	Addressing		Mnemonic		Bytes	Cyles
+	-----------------------------------------------------
+	5C C8	Implied			CBH				1+1		1+1
+
+
+RND		- "Random", Loads a Byte from the LFSR into the Accumulator
+
+	N V S B D I Z C
+	+ - - - - - + -
+	
+	Opcode	Addressing		Mnemonic		Bytes	Cyles
+	-----------------------------------------------------
+	5C 3B	Implied			RND				1+1		1+1
+
+
+PHR		- "Push Registers", Pushes the Z, Y, X, B, A Registers onto the Stack in that Order
+
+	N V S B D I Z C
+	- - - - - - - -
+	
+	Opcode	Addressing		Mnemonic		Bytes	Cyles
+	-----------------------------------------------------
+	5C 48	Implied			PHR				1+1		6+1
+
+
+PLR		- "Pull Registers", Pulls the A, B, X, Y, Z Registers from the Stack in that Order 
+
+	N V S B D I Z C
+	- - - - - - - -
+	
+	Opcode	Addressing		Mnemonic		Bytes	Cyles
+	-----------------------------------------------------
+	5C 68	Implied			PLR				1+1		6+1
+
+
+WAI		- "Wait", Halts the CPU until an Interrupt (IRQ (if enabled), NMI, ABT, RESET) occurs
+
+	N V S B D I Z C
+	- - - - - - - -
+	
+	Opcode	Addressing		Mnemonic		Bytes	Cyles
+	-----------------------------------------------------
+	5C EF	Implied			WAI				1+1		∞
+
+
+STP		- "Stop", Halts the CPU until an Interrupt (ABT, RESET) occurs
+
+	N V S B D I Z C
+	- - - - - - - -
+	
+	Opcode	Addressing		Mnemonic		Bytes	Cyles
+	-----------------------------------------------------
+	5C FF	Implied			STP				1+1		∞
+
+
+
+
+
+
+

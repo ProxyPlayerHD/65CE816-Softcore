@@ -1,0 +1,749 @@
+; Addressing Modes:
+; #			Immediate
+; ABS		Absolute
+; ABS,X		Absolute X-Indexed
+; ABS,Y		Absolute Y-Indexed
+; <BP		Base Page
+; <BP,X		Base Page X-Indexed
+; <BP,Y		Base Page Y-Indexed
+; (BP,X)	Base Page X-Indexed Indirect
+; (BP),Y	Base Page Indirect Y-Indexed
+; (BP),Z	Base Page Indirect Z-Indexed
+; (BP,X),Y	Base Page X-Indexed Indirect Y-Indexed (or just "Double Indirect")
+; (D,SP),Y	Stack Indirect Y-Indexed
+; SP,Y		Stack Y-Indexed
+; (ABS)		Absolute Indirect
+; (ABS,X)	Absolute Indirect X-Indexed
+; R			Relative
+; RR		Relative (Word)
+; PC,XY		PC Relative XY-Indexed
+; 
+
+
+#ruledef
+{
+	#bits 8
+	
+;------------------------------------------------------------------------------
+	; Add with Carry
+	ADC #{SRC:i8}					=> 0x69 @ SRC`8
+	ADC <{SRC:i8}					=> 0x65 @ SRC`8
+	ADC <{SRC:i8},X					=> 0x75 @ SRC`8
+	ADC {SRC:i16}					=> 0x6D @ SRC[7:0] @ SRC[15:8]
+	ADC {SRC:i16},X					=> 0x7D @ SRC[7:0] @ SRC[15:8]
+	ADC {SRC:i16},Y					=> 0x79 @ SRC[7:0] @ SRC[15:8]
+	ADC ({SRC:i8},X)				=> 0x61 @ SRC`8
+	ADC ({SRC:i8}),Y				=> 0x71 @ SRC`8
+	ADC ({SRC:i8}),Z				=> 0x72 @ SRC`8
+	
+	; Add without Carry
+	ADD #{SRC:i8}					=> 0x18 @ 0x69 @ SRC`8
+	ADD <{SRC:i8}					=> 0x18 @ 0x75 @ SRC`8
+	ADD <{SRC:i8},X					=> 0x18 @ 0x75 @ SRC`8
+	ADD {SRC:i16}					=> 0x18 @ 0x6D @ SRC[7:0] @ SRC[15:8]
+	ADD {SRC:i16},X					=> 0x18 @ 0x7D @ SRC[7:0] @ SRC[15:8]
+	ADD {SRC:i16},Y					=> 0x18 @ 0x79 @ SRC[7:0] @ SRC[15:8]
+	ADD ({SRC:i8},X)				=> 0x18 @ 0x61 @ SRC`8
+	ADD ({SRC:i8}),Y				=> 0x18 @ 0x71 @ SRC`8
+	ADD ({SRC:i8}),Z				=> 0x18 @ 0x72 @ SRC`8
+	
+;------------------------------------------------------------------------------
+	; Logic AND
+	AND #{SRC:i8}					=> 0x29 @ SRC`8
+	AND <{SRC:i8}					=> 0x25 @ SRC`8
+	AND <{SRC:i8},X					=> 0x35 @ SRC`8
+	AND {SRC:i16}					=> 0x2D @ SRC[7:0] @ SRC[15:8]
+	AND {SRC:i16},X					=> 0x3D @ SRC[7:0] @ SRC[15:8]
+	AND {SRC:i16},Y					=> 0x39 @ SRC[7:0] @ SRC[15:8]
+	AND ({SRC:i8},X)				=> 0x21 @ SRC`8
+	AND ({SRC:i8}),Y				=> 0x31 @ SRC`8
+	AND ({SRC:i8}),Z				=> 0x32 @ SRC`8
+	
+;------------------------------------------------------------------------------
+	; Arithmetic Shift Left
+	ASL A							=> 0x0A
+	ASL <{SRC:i8}					=> 0x06 @ SRC`8
+	ASL <{SRC:i8},X					=> 0x16 @ SRC`8
+	ASL {SRC:i16}					=> 0x0E @ SRC[7:0] @ SRC[15:8]
+	ASL {SRC:i16},X					=> 0x1E @ SRC[7:0] @ SRC[15:8]
+	
+;------------------------------------------------------------------------------
+	; Arithmetic Shift Left Word
+	ASW {SRC:i16}					=> 0xCB @ SRC[7:0] @ SRC[15:8]
+	ALW {SRC:i16}					=> 0xCB @ SRC[7:0] @ SRC[15:8]
+	
+;------------------------------------------------------------------------------
+	; Arithmetic Shift Right
+	ASR A							=> 0x43
+	ASR <{SRC:i8}					=> 0x44 @ SRC`8
+	ASR <{SRC:i8},X					=> 0x54 @ SRC`8
+	
+;------------------------------------------------------------------------------
+	; Arithmetic Shift Right Word
+	ARW {SRC:i16}					=> 0x5C @ 0xCB @ SRC[7:0] @ SRC[15:8]
+	
+;------------------------------------------------------------------------------
+	; Branch Always
+	BRA {SRC:i16}					=> {REL = (SRC - (pc + 2)), assert(REL <= 127 && REL >= -128), 0x80 @ REL`8}
+	BRA {SRC:i16}					=> {REL = (SRC - (pc + 2)), assert(REL > 127 || REL < -128), 0x83 @ REL[7:0] @ REL[15:8]}
+	
+;------------------------------------------------------------------------------
+	; Branch on Bit Clear
+	BBC{VAL} {SRC:i8},{SRC1:i16}	=> {VAL}[2:0] @ 0b01111 @ SRC`8 @ ({SRC1} - (pc + 3))
+	BBC{VAL} <{SRC:i8},{SRC1:i16}	=> {VAL}[2:0] @ 0b01111 @ SRC`8 @ ({SRC1} - (pc + 3))
+	
+	BBC {VAL},{SRC:i8},{SRC1:i16}	=> {VAL}[2:0] @ 0b01111 @ SRC`8 @ ({SRC1} - (pc + 3))
+	BBC {VAL},<{SRC:i8},{SRC1:i16}	=> {VAL}[2:0] @ 0b01111 @ SRC`8 @ ({SRC1} - (pc + 3))
+	
+	BBR{VAL} {SRC:i8},{SRC1:i16}	=> {VAL}[2:0] @ 0b01111 @ SRC`8 @ ({SRC1} - (pc + 3))
+	BBR{VAL} <{SRC:i8},{SRC1:i16}	=> {VAL}[2:0] @ 0b01111 @ SRC`8 @ ({SRC1} - (pc + 3))
+	
+	BBR {VAL},{SRC:i8},{SRC1:i16}	=> {VAL}[2:0] @ 0b01111 @ SRC`8 @ ({SRC1} - (pc + 3))
+	BBR {VAL},<{SRC:i8},{SRC1:i16}	=> {VAL}[2:0] @ 0b01111 @ SRC`8 @ ({SRC1} - (pc + 3))
+	
+;------------------------------------------------------------------------------
+	; Branch on Bit Set
+	BBS{VAL} {SRC:i8},{SRC1:i16}	=> {VAL}[2:0] @ 0b11111 @ SRC`8 @ ({SRC1} - (pc + 3))
+	BBS{VAL} <{SRC:i8},{SRC1:i16}	=> {VAL}[2:0] @ 0b11111 @ SRC`8 @ ({SRC1} - (pc + 3))
+	
+	BBS {VAL},{SRC:i8},{SRC1:i16}	=> {VAL}[2:0] @ 0b11111 @ SRC`8 @ ({SRC1} - (pc + 3))
+	BBS {VAL},<{SRC:i8},{SRC1:i16}	=> {VAL}[2:0] @ 0b11111 @ SRC`8 @ ({SRC1} - (pc + 3))
+	
+;------------------------------------------------------------------------------
+	; Branch on Carry Clear
+	BCC {SRC:i16}					=> {REL = (SRC - (pc + 2)), assert(REL <= 127 && REL >= -128), 0x90 @ REL`8}
+	
+	BCC {SRC:i16}					=> {REL = (SRC - (pc + 3)), assert(REL > 127 || REL < -128), 0x93 @ REL[7:0] @ REL[15:8]}
+	
+;------------------------------------------------------------------------------
+	; Branch on Carry Set
+	BCS {SRC:i16}					=> {REL = (SRC - (pc + 2)), assert(REL <= 127 && REL >= -128), 0xB0 @ REL`8}
+	
+	BCS {SRC:i16}					=> {REL = (SRC - (pc + 3)), assert(REL > 127 || REL < -128), 0xB3 @ REL[7:0] @ REL[15:8]}
+	
+;------------------------------------------------------------------------------
+	; Branch on Zero Set
+	BZS {SRC:i16}					=> {REL = (SRC - (pc + 2)), assert(REL <= 127 && REL >= -128), 0xF0 @ REL`8}
+	BEQ {SRC:i16}					=> {REL = (SRC - (pc + 2)), assert(REL <= 127 && REL >= -128), 0xF0 @ REL`8}
+	
+	BZS {SRC:i16}					=> {REL = (SRC - (pc + 3)), assert(REL > 127 || REL < -128), 0xF3 @ REL[7:0] @ REL[15:8]}
+	BEQ {SRC:i16}					=> {REL = (SRC - (pc + 3)), assert(REL > 127 || REL < -128), 0xF3 @ REL[7:0] @ REL[15:8]}
+	
+;------------------------------------------------------------------------------
+	; Bit Test
+	BIT #{SRC:i8}					=> 0x89 @ SRC`8
+	BIT <{SRC:i8}					=> 0x24 @ SRC`8
+	BIT <{SRC:i8},X					=> 0x34 @ SRC`8
+	BIT {SRC:i16}					=> 0x2C @ SRC[7:0] @ SRC[15:8]
+	BIT {SRC:i16},X					=> 0x3C @ SRC[7:0] @ SRC[15:8]
+	
+;------------------------------------------------------------------------------
+	; Branch Negative Set
+	BNS {SRC:i16}					=> {REL = (SRC - (pc + 2)), assert(REL <= 127 && REL >= -128), 0x30 @ REL`8}
+	BMI {SRC:i16}					=> {REL = (SRC - (pc + 2)), assert(REL <= 127 && REL >= -128), 0x30 @ REL`8}
+	
+	BNS {SRC:i16}					=> {REL = (SRC - (pc + 3)), assert(REL > 127 || REL < -128), 0x33 @ REL[7:0] @ REL[15:8]}
+	BMI {SRC:i16}					=> {REL = (SRC - (pc + 3)), assert(REL > 127 || REL < -128), 0x33 @ REL[7:0] @ REL[15:8]}
+	
+;------------------------------------------------------------------------------
+	; Branch on Zero Clear
+	BZC {SRC:i16}					=> {REL = (SRC - (pc + 2)), assert(REL <= 127 && REL >= -128), 0xD0 @ REL`8}
+	BNE {SRC:i16}					=> {REL = (SRC - (pc + 2)), assert(REL <= 127 && REL >= -128), 0xD0 @ REL`8}
+	
+	BZC {SRC:i16}					=> {REL = (SRC - (pc + 3)), assert(REL > 127 || REL < -128), 0xD3 @ REL[7:0] @ REL[15:8]}
+	BNE {SRC:i16}					=> {REL = (SRC - (pc + 3)), assert(REL > 127 || REL < -128), 0xD3 @ REL[7:0] @ REL[15:8]}
+	
+;------------------------------------------------------------------------------
+	; Branch Negative Clear
+	BNC {SRC:i16}					=> {REL = (SRC - (pc + 2)), assert(REL <= 127 && REL >= -128), 0x10 @ REL`8}
+	BPL {SRC:i16}					=> {REL = (SRC - (pc + 2)), assert(REL <= 127 && REL >= -128), 0x10 @ REL`8}
+	
+	BNC {SRC:i16}					=> {REL = (SRC - (pc + 3)), assert(REL > 127 || REL < -128), 0x13 @ REL[7:0] @ REL[15:8]}
+	BPL {SRC:i16}					=> {REL = (SRC - (pc + 3)), assert(REL > 127 || REL < -128), 0x13 @ REL[7:0] @ REL[15:8]}
+	
+;------------------------------------------------------------------------------
+	; Branch Subroutine
+	BSR {SRC:i16}					=> 0x63 @ (SRC - (pc + 3))`16
+	
+;------------------------------------------------------------------------------
+	; Break (Interrupt)
+	BRK								=> 0x0000
+	BRK #{SRC:i8}					=> 0x00 @ SRC
+	
+;------------------------------------------------------------------------------
+	; Branch on Overflow Clear
+	BVC {SRC:i16}					=> {REL = (SRC - (pc + 2)), assert(REL <= 127 && REL >= -128), 0x50 @ REL`8}
+	
+	BVC {SRC:i16}					=> {REL = (SRC - (pc + 3)), assert(REL > 127 || REL < -128), 0x53 @ REL[7:0] @ REL[15:8]}
+	
+;------------------------------------------------------------------------------
+	; Branch on Overflow Set
+	BVS {SRC:i16}					=> {REL = (SRC - (pc + 2)), assert(REL <= 127 && REL >= -128), 0x70 @ REL`8}
+	
+	BVS {SRC:i16}					=> {REL = (SRC - (pc + 3)), assert(REL > 127 || REL < -128), 0x73 @ REL[7:0] @ REL[15:8]}
+	
+;------------------------------------------------------------------------------
+	; Convert HEX <-> BCD
+	CHB								=> 0x5C @ 0xC8
+	CBH								=> 0x5C @ 0xE8
+	
+;------------------------------------------------------------------------------
+	; Clear Extended
+	CLE								=> 0x02
+	
+;------------------------------------------------------------------------------
+	; Clear Carry
+	CLC								=> 0x18
+	
+;------------------------------------------------------------------------------
+	; Clear Decimal
+	CLD								=> 0xD8
+	
+;------------------------------------------------------------------------------
+	; Clear Interrupt Disable
+	CLI								=> 0x58
+	
+;------------------------------------------------------------------------------
+	; Clear Overflow
+	CLV								=> 0xB8
+	
+;------------------------------------------------------------------------------
+	; Compare with Accumulator
+	CMP #{SRC:i8}					=> 0xC9 @ SRC`8
+	CMP <{SRC:i8}					=> 0xC5 @ SRC`8
+	CMP <{SRC:i8},X					=> 0xD5 @ SRC`8
+	CMP {SRC:i16}					=> 0xCD @ SRC[7:0] @ SRC[15:8]
+	CMP {SRC:i16},X					=> 0xDD @ SRC[7:0] @ SRC[15:8]
+	CMP {SRC:i16},Y					=> 0xD9 @ SRC[7:0] @ SRC[15:8]
+	CMP ({SRC:i8},X)				=> 0xC1 @ SRC`8
+	CMP ({SRC:i8}),Y				=> 0xD1 @ SRC`8
+	CMP ({SRC:i8}),Z				=> 0xD2 @ SRC`8
+	
+	CPA #{SRC:i8}					=> 0xC9 @ SRC`8
+	CPA <{SRC:i8}					=> 0xC5 @ SRC`8
+	CPA <{SRC:i8},X					=> 0xD5 @ SRC`8
+	CPA {SRC:i16}					=> 0xCD @ SRC[7:0] @ SRC[15:8]
+	CPA {SRC:i16},X					=> 0xDD @ SRC[7:0] @ SRC[15:8]
+	CPA {SRC:i16},Y					=> 0xD9 @ SRC[7:0] @ SRC[15:8]
+	CPA ({SRC:i8},X)				=> 0xC1 @ SRC`8
+	CPA ({SRC:i8}),Y				=> 0xD1 @ SRC`8
+	CPA ({SRC:i8}),Z				=> 0xD2 @ SRC`8
+	
+;------------------------------------------------------------------------------
+	; Compare with X
+	CPX #{SRC:i8}						=> 0xE0 @ SRC`8
+	CPX <{SRC:i8}						=> 0xE4 @ SRC`8
+	CPX {SRC:i16}						=> 0xEC @ SRC[7:0] @ SRC[15:8]
+	
+;------------------------------------------------------------------------------
+	; Compare with Y
+	CPY #{SRC:i8}					=> 0xC0 @ SRC`8
+	CPY <{SRC:i8}					=> 0xC4 @ SRC`8
+	CPY {SRC:i16}					=> 0xCC @ SRC[7:0] @ SRC[15:8]
+	
+;------------------------------------------------------------------------------
+	; Compare with Z
+	CPZ #{SRC:i8}					=> 0xC2 @ SRC`8
+	CPZ <{SRC:i8}					=> 0xD4 @ SRC`8
+	CPZ {SRC:i16}					=> 0xDC @ SRC[7:0] @ SRC[15:8]
+	
+;------------------------------------------------------------------------------
+	; Divide Accumulator by Memory (Store Result)
+	DIV #{SRC:i8}					=> 0x5C @ 0x69 @ SRC`8
+	DIV <{SRC:i8}					=> 0x5C @ 0x65 @ SRC`8
+	DIV <{SRC:i8},X					=> 0x5C @ 0x75 @ SRC`8
+	DIV {SRC:i16}					=> 0x5C @ 0x6D @ SRC[7:0] @ SRC[15:8]
+	DIV {SRC:i16},X					=> 0x5C @ 0x7D @ SRC[7:0] @ SRC[15:8]
+	DIV {SRC:i16},Y					=> 0x5C @ 0x79 @ SRC[7:0] @ SRC[15:8]
+	
+;------------------------------------------------------------------------------
+	; Decrement Memory with Carry
+	DCC <{SRC:i8}					=> 0x5C @ 0xC6 @ SRC`8
+	DCC <{SRC:i8},X					=> 0x5C @ 0xD6 @ SRC`8
+	DCC {SRC:i16}					=> 0x5C @ 0xCE @ SRC[7:0] @ SRC[15:8]
+	DCC {SRC:i16},X					=> 0x5C @ 0xDE @ SRC[7:0] @ SRC[15:8]
+
+;------------------------------------------------------------------------------
+	; Decrement A
+	DEC A							=> 0x3A
+	DEA								=> 0x3A
+	
+;------------------------------------------------------------------------------
+	; Decrement Memory
+	DEC <{SRC:i8}					=> 0xC6 @ SRC`8
+	DEC <{SRC:i8},X					=> 0xD6 @ SRC`8
+	DEC {SRC:i16}					=> 0xCE @ SRC[7:0] @ SRC[15:8]
+	DEC {SRC:i16},X					=> 0xDE @ SRC[7:0] @ SRC[15:8]
+
+;------------------------------------------------------------------------------
+	; Decrement X
+	DEC X							=> 0xCA
+	DEX								=> 0xCA
+	
+;------------------------------------------------------------------------------
+	; Decrement Y
+	DEC Y							=> 0x88
+	DEY								=> 0x88
+	
+;------------------------------------------------------------------------------
+	; Decrement Z
+	DEC Z							=> 0x3B
+	DEZ								=> 0x3B
+	
+;------------------------------------------------------------------------------
+	; Logic XOR
+	XOR #{SRC:i8}					=> 0x49 @ SRC`8
+	XOR <{SRC:i8}					=> 0x45 @ SRC`8
+	XOR <{SRC:i8},X					=> 0x55 @ SRC`8
+	XOR {SRC:i16}					=> 0x4D @ SRC[7:0] @ SRC[15:8]
+	XOR {SRC:i16},X					=> 0x5D @ SRC[7:0] @ SRC[15:8]
+	XOR {SRC:i16},Y					=> 0x59 @ SRC[7:0] @ SRC[15:8]
+	XOR ({SRC:i8},X)				=> 0x41 @ SRC`8
+	XOR ({SRC:i8}),Y				=> 0x51 @ SRC`8
+	XOR ({SRC:i8}),Z				=> 0x52 @ SRC`8
+	
+;------------------------------------------------------------------------------
+	; Increment Memory with Carry
+	ICC <{SRC:i8}					=> 0x5C @ 0xE6 @ SRC`8
+	ICC <{SRC:i8},X					=> 0x5C @ 0xF6 @ SRC`8
+	ICC {SRC:i16}					=> 0x5C @ 0xEE @ SRC[7:0] @ SRC[15:8]
+	ICC {SRC:i16},X					=> 0x5C @ 0xFE @ SRC[7:0] @ SRC[15:8]
+	
+;------------------------------------------------------------------------------
+	; Increment A
+	INC A							=> 0x1A
+	INA								=> 0x1A
+	
+;------------------------------------------------------------------------------
+	; Increment Memory
+	INC <{SRC:i8}					=> 0xE6 @ SRC`8
+	INC <{SRC:i8},X					=> 0xF6 @ SRC`8
+	INC {SRC:i16}					=> 0xEE @ SRC[7:0] @ SRC[15:8]
+	INC {SRC:i16},X					=> 0xFE @ SRC[7:0] @ SRC[15:8]
+	
+;------------------------------------------------------------------------------
+	; Increment X
+	INC X							=> 0xE8
+	INX								=> 0xE8
+	
+;------------------------------------------------------------------------------
+	; Increment Y
+	INC Y							=> 0xC8
+	INY								=> 0xC8
+	
+;------------------------------------------------------------------------------
+	; Increment Z
+	INC Z							=> 0x1B
+	INZ								=> 0x1B
+	
+;------------------------------------------------------------------------------
+	; Jump
+	JMP {SRC:i16}					=> 0x4C @ SRC[7:0] @ SRC[15:8]
+	JMP ({SRC:i16})					=> 0x6C @ SRC[7:0] @ SRC[15:8]
+	JMP ({SRC:i16},X)				=> 0x7C @ SRC[7:0] @ SRC[15:8]
+	
+;------------------------------------------------------------------------------
+	; Jump Subroutine
+	JSR {SRC:i16}					=> 0x20 @ SRC[7:0] @ SRC[15:8]
+	JSR ({SRC:i16})					=> 0x22 @ SRC[7:0] @ SRC[15:8]
+	JSR ({SRC:i16},X)				=> 0x23 @ SRC[7:0] @ SRC[15:8]
+	
+;------------------------------------------------------------------------------
+	; Load Accumulator
+	LDA #{SRC:i8}					=> 0xA9 @ SRC`8
+	LDA <{SRC:i8}					=> 0xA5 @ SRC`8
+	LDA <{SRC:i8},X					=> 0xB5 @ SRC`8
+	LDA {SRC:i16}					=> 0xAD @ SRC[7:0] @ SRC[15:8]
+	LDA {SRC:i16},X					=> 0xBD @ SRC[7:0] @ SRC[15:8]
+	LDA {SRC:i16},Y					=> 0xB9 @ SRC[7:0] @ SRC[15:8]
+	LDA ({SRC:i8},X)				=> 0xA1 @ SRC`8
+	LDA ({SRC:i8}),Y				=> 0xB1 @ SRC`8
+	LDA ({SRC:i8}),Z				=> 0xB2 @ SRC`8
+	LDA ({SRC:i8},SP),Y				=> 0xE2 @ SRC`8
+	LDA SP,Y						=> 0x5C @ 0xE2
+	LDA ({SRC:i8},X),Y				=> 0x5C @ 0xE1 @ SRC`8
+	LDA PC,XY						=> 0x5C @ 0xF1
+	
+;------------------------------------------------------------------------------
+	; Load X
+	LDX #{SRC:i8}					=> 0xA2 @ SRC`8
+	LDX <{SRC:i8}					=> 0xA6 @ SRC`8
+	LDX <{SRC:i8},Y					=> 0xB6 @ SRC`8
+	LDX {SRC:i16}					=> 0xAE @ SRC[7:0] @ SRC[15:8]
+	LDX {SRC:i16},Y					=> 0xBE @ SRC[7:0] @ SRC[15:8]
+	
+;------------------------------------------------------------------------------
+	; Load Y
+	LDY #{SRC:i8}					=> 0xA0 @ SRC`8
+	LDY <{SRC:i8}					=> 0xA4 @ SRC`8
+	LDY <{SRC:i8},X					=> 0xB4 @ SRC`8
+	LDY {SRC:i16}					=> 0xAC @ SRC[7:0] @ SRC[15:8]
+	LDY {SRC:i16},X					=> 0xBC @ SRC[7:0] @ SRC[15:8]
+	
+;------------------------------------------------------------------------------
+	; Load Z
+	LDZ #{SRC:i8}					=> 0xA3 @ SRC`8
+	LDZ {SRC:i16}					=> 0xAB @ SRC[7:0] @ SRC[15:8]
+	LDZ {SRC:i16},X					=> 0xBB @ SRC[7:0] @ SRC[15:8]
+	
+;------------------------------------------------------------------------------
+	; Logical Shift Right
+	LSR A							=> 0x4A
+	LSR <{SRC:i8}					=> 0x46 @ SRC`8
+	LSR <{SRC:i8},X					=> 0x56 @ SRC`8
+	LSR {SRC:i16}					=> 0x4E @ SRC[7:0] @ SRC[15:8]
+	LSR {SRC:i16},X					=> 0x5E @ SRC[7:0] @ SRC[15:8]
+	
+;------------------------------------------------------------------------------
+	; Logical Shift Right Word
+	LRW {SRC:i16}					=> 0x5C @ 0xCA @ SRC[7:0] @ SRC[15:8]
+	
+;------------------------------------------------------------------------------
+	; Multiply Accumulator by Memory (Store Low Byte)
+	MUL #{SRC:i8}					=> 0x5C @ 0x09 @ SRC`8
+	MUL <{SRC:i8}					=> 0x5C @ 0x05 @ SRC`8
+	MUL <{SRC:i8},X					=> 0x5C @ 0x15 @ SRC`8
+	MUL {SRC:i16}					=> 0x5C @ 0x0D @ SRC[7:0] @ SRC[15:8]
+	MUL {SRC:i16},X					=> 0x5C @ 0x1D @ SRC[7:0] @ SRC[15:8]
+	MUL {SRC:i16},Y					=> 0x5C @ 0x19 @ SRC[7:0] @ SRC[15:8]
+	
+	MLL #{SRC:i8}					=> 0x5C @ 0x09 @ SRC`8
+	MLL <{SRC:i8}					=> 0x5C @ 0x05 @ SRC`8
+	MLL <{SRC:i8},X					=> 0x5C @ 0x15 @ SRC`8
+	MLL {SRC:i16}					=> 0x5C @ 0x0D @ SRC[7:0] @ SRC[15:8]
+	MLL {SRC:i16},X					=> 0x5C @ 0x1D @ SRC[7:0] @ SRC[15:8]
+	MLL {SRC:i16},Y					=> 0x5C @ 0x19 @ SRC[7:0] @ SRC[15:8]
+	
+;------------------------------------------------------------------------------
+	; Multiply Accumulator by Memory (Store High Byte)
+	MLH #{SRC:i8}					=> 0x5C @ 0x29 @ SRC`8
+	MLH <{SRC:i8}					=> 0x5C @ 0x25 @ SRC`8
+	MLH <{SRC:i8},X					=> 0x5C @ 0x35 @ SRC`8
+	MLH {SRC:i16}					=> 0x5C @ 0x2D @ SRC[7:0] @ SRC[15:8]
+	MLH {SRC:i16},X					=> 0x5C @ 0x3D @ SRC[7:0] @ SRC[15:8]
+	MLH {SRC:i16},Y					=> 0x5C @ 0x39 @ SRC[7:0] @ SRC[15:8]
+	
+;------------------------------------------------------------------------------
+	; Divide Accumulator by Memory (Store Remainder)
+	MOD #{SRC:i8}					=> 0x5C @ 0x49 @ SRC`8
+	MOD <{SRC:i8}					=> 0x5C @ 0x45 @ SRC`8
+	MOD <{SRC:i8},X					=> 0x5C @ 0x55 @ SRC`8
+	MOD {SRC:i16}					=> 0x5C @ 0x4D @ SRC[7:0] @ SRC[15:8]
+	MOD {SRC:i16},X					=> 0x5C @ 0x5D @ SRC[7:0] @ SRC[15:8]
+	MOD {SRC:i16},Y					=> 0x5C @ 0x59 @ SRC[7:0] @ SRC[15:8]
+	
+;------------------------------------------------------------------------------
+	; No Operation
+	NOP								=> 0xEA
+	
+;------------------------------------------------------------------------------
+	; Logic OR
+	ORA #{SRC:i8}					=> 0x09 @ SRC`8
+	ORA <{SRC:i8}					=> 0x05 @ SRC`8
+	ORA <{SRC:i8},X					=> 0x15 @ SRC`8
+	ORA {SRC:i16}					=> 0x0D @ SRC[7:0] @ SRC[15:8]
+	ORA {SRC:i16},X					=> 0x1D @ SRC[7:0] @ SRC[15:8]
+	ORA {SRC:i16},Y					=> 0x19 @ SRC[7:0] @ SRC[15:8]
+	ORA ({SRC:i8},X)				=> 0x01 @ SRC`8
+	ORA ({SRC:i8}),Y				=> 0x11 @ SRC`8
+	ORA ({SRC:i8}),Z				=> 0x12 @ SRC`8
+	
+;------------------------------------------------------------------------------
+	; Push Accumulator
+	PHA								=> 0x48
+	
+;------------------------------------------------------------------------------
+	; Push Registers
+	PHR								=> 0x5C @ 0x48
+	
+;------------------------------------------------------------------------------
+	; Push Processor Status
+	PHP								=> 0x08
+	
+;------------------------------------------------------------------------------
+	; Push Word
+	PHW #{SRC:i16}					=> 0xF4 @ SRC[7:0] @ SRC[15:8]
+	PHW {SRC:i16}					=> 0xFC @ SRC[7:0] @ SRC[15:8]
+	
+;------------------------------------------------------------------------------
+	; Push X Register
+	PHX								=> 0xDA
+	
+;------------------------------------------------------------------------------
+	; Push Y Register
+	PHY								=> 0x5A
+	
+;------------------------------------------------------------------------------
+	; Push Z Register
+	PHZ								=> 0xDB
+	
+;------------------------------------------------------------------------------
+	; Pull Accumulator
+	PLA								=> 0x68
+	
+;------------------------------------------------------------------------------
+	; Pull Processor Status
+	PLP								=> 0x28
+	
+;------------------------------------------------------------------------------
+	; Pull Registers
+	PLR								=> 0x5C @ 0x68
+	
+;------------------------------------------------------------------------------
+	; Pull X Register
+	PLX								=> 0xFA
+	
+;------------------------------------------------------------------------------
+	; Pull Y Register
+	PLY								=> 0x7A
+	
+;------------------------------------------------------------------------------
+	; Pull Z Register
+	PLZ								=> 0xFB
+	
+;------------------------------------------------------------------------------
+	; Clear Memory Bit
+	CMB{VAL} {SRC:i8}				=> {VAL}[2:0] @ 0b00111 @ SRC`8
+	CMB{VAL} <{SRC:i8}				=> {VAL}[2:0] @ 0b00111 @ SRC`8
+	
+	CMB {VAL},{SRC:i8}				=> {VAL}[2:0] @ 0b00111 @ SRC`8
+	CMB {VAL},<{SRC:i8}				=> {VAL}[2:0] @ 0b00111 @ SRC`8
+	
+	RMB{VAL} {SRC:i8}				=> {VAL}[2:0] @ 0b00111 @ SRC`8
+	RMB{VAL} <{SRC:i8}				=> {VAL}[2:0] @ 0b00111 @ SRC`8
+	
+	RMB {VAL},{SRC:i8}				=> {VAL}[2:0] @ 0b00111 @ SRC`8
+	RMB {VAL},<{SRC:i8}				=> {VAL}[2:0] @ 0b00111 @ SRC`8
+	
+;------------------------------------------------------------------------------
+	; Random
+	RND A							=> 0x5C @ 0x3B
+	RND								=> 0x5C @ 0x3B
+	
+;------------------------------------------------------------------------------
+	; Rotate Left
+	ROL A							=> 0x2A
+	ROL <{SRC:i8}					=> 0x26 @ SRC`8
+	ROL <{SRC:i8},X					=> 0x36 @ SRC`8
+	ROL {SRC:i16}					=> 0x2E @ SRC[7:0] @ SRC[15:8]
+	ROL {SRC:i16},X					=> 0x3E @ SRC[7:0] @ SRC[15:8]
+	
+;------------------------------------------------------------------------------
+	; Rotate Left Word
+	ROW {SRC:i16}					=> 0xEB @ SRC[7:0] @ SRC[15:8]
+	RLW {SRC:i16}					=> 0xEB @ SRC[7:0] @ SRC[15:8]
+	
+;------------------------------------------------------------------------------
+	; Rotate Right
+	ROR A							=> 0x6A
+	ROR <{SRC:i8}					=> 0x66 @ SRC`8
+	ROR <{SRC:i8},X					=> 0x76 @ SRC`8
+	ROR {SRC:i16}					=> 0x6E @ SRC[7:0] @ SRC[15:8]
+	ROR {SRC:i16},X					=> 0x7E @ SRC[7:0] @ SRC[15:8]
+	
+;------------------------------------------------------------------------------
+	; Rotate Right Word
+	RRW {SRC:i16}					=> 0x5C @ 0xEB @ SRC[7:0] @ SRC[15:8]
+	
+;------------------------------------------------------------------------------
+	; Return from Interrupt
+	RTI								=> 0x40
+	
+;------------------------------------------------------------------------------
+	; Return... from Subroutine
+	RTN #{SRC:i8}					=> 0x62 @ SRC`8
+	
+;------------------------------------------------------------------------------
+	; Return from Subroutine
+	RTS								=> 0x60
+	
+;------------------------------------------------------------------------------
+	; Subtract with Carry
+	SBC #{SRC:i8}					=> 0xE9 @ SRC`8
+	SBC <{SRC:i8}					=> 0xE5 @ SRC`8
+	SBC <{SRC:i8},X					=> 0xF5 @ SRC`8
+	SBC {SRC:i16}					=> 0xED @ SRC[7:0] @ SRC[15:8]
+	SBC {SRC:i16},X					=> 0xFD @ SRC[7:0] @ SRC[15:8]
+	SBC {SRC:i16},Y					=> 0xF9 @ SRC[7:0] @ SRC[15:8]
+	SBC ({SRC:i8},X)				=> 0xE1 @ SRC`8
+	SBC ({SRC:i8}),Y				=> 0xF1 @ SRC`8
+	SBC ({SRC:i8}),Z				=> 0xF2 @ SRC`8
+	
+	; Subtract without Carry
+	SUB #{SRC:i8}					=> 0x38 @ 0xE9 @ SRC`8
+	SUB <{SRC:i8}					=> 0x38 @ 0xE5 @ SRC`8
+	SUB <{SRC:i8},X					=> 0x38 @ 0xF5 @ SRC`8
+	SUB {SRC:i16}					=> 0x38 @ 0xED @ SRC[7:0] @ SRC[15:8]
+	SUB {SRC:i16},X					=> 0x38 @ 0xFD @ SRC[7:0] @ SRC[15:8]
+	SUB {SRC:i16},Y					=> 0x38 @ 0xF9 @ SRC[7:0] @ SRC[15:8]
+	SUB ({SRC:i8},X)				=> 0x38 @ 0xE1 @ SRC`8
+	SUB ({SRC:i8}),Y				=> 0x38 @ 0xF1 @ SRC`8
+	SUB ({SRC:i8}),Z				=> 0x38 @ 0xF2 @ SRC`8
+	
+;------------------------------------------------------------------------------
+	; Set Carry
+	SEC								=> 0x38
+	
+;------------------------------------------------------------------------------
+	; Set Decimal
+	SED								=> 0xF8
+	
+;------------------------------------------------------------------------------
+	; Set Interrupt Disable
+	SEE								=> 0x03
+	
+;------------------------------------------------------------------------------
+	; Set Interrupt Disable
+	SEI								=> 0x78
+	
+;------------------------------------------------------------------------------
+	; Set Memory Bit
+	SMB{VAL} {SRC:i8}				=> {VAL}[2:0] @ 0b10111 @ SRC`8
+	SMB{VAL} <{SRC:i8}				=> {VAL}[2:0] @ 0b10111 @ SRC`8
+	
+	SMB {VAL},{SRC:i8}				=> {VAL}[2:0] @ 0b10111 @ SRC`8
+	SMB {VAL},<{SRC:i8}				=> {VAL}[2:0] @ 0b10111 @ SRC`8
+	
+;------------------------------------------------------------------------------
+	; Store Accumulator
+	STA <{SRC:i8}					=> 0x85 @ SRC`8
+	STA <{SRC:i8},X					=> 0x95 @ SRC`8
+	STA {SRC:i16}					=> 0x8D @ SRC[7:0] @ SRC[15:8]
+	STA {SRC:i16},X					=> 0x9D @ SRC[7:0] @ SRC[15:8]
+	STA {SRC:i16},Y					=> 0x99 @ SRC[7:0] @ SRC[15:8]
+	STA ({SRC:i8},X)				=> 0x81 @ SRC`8
+	STA ({SRC:i8}),Y				=> 0x91 @ SRC`8
+	STA ({SRC:i8}),Z				=> 0x92 @ SRC`8
+	STA ({SRC:i8},SP),Y				=> 0x82 @ SRC`8
+	STA SP,Y						=> 0x5C @ 0x82
+	STA ({SRC:i8},X),Y				=> 0x5C @ 0x81 @ SRC`8
+	STA PC,XY						=> 0x5C @ 0x91
+	
+;------------------------------------------------------------------------------
+	; Stop Processor (Halt)
+	STP								=> 0x5C @ 0xFF
+	HLT								=> 0x5C @ 0xFF
+	
+;------------------------------------------------------------------------------
+	; Store X
+	STX <{SRC:i8}					=> 0x86 @ SRC`8
+	STX <{SRC:i8},Y					=> 0x96 @ SRC`8
+	STX {SRC:i16}					=> 0x8E @ SRC[7:0] @ SRC[15:8]
+	
+;------------------------------------------------------------------------------
+	; Store Y
+	STY <{SRC:i8}					=> 0x84 @ SRC`8
+	STY <{SRC:i8},X					=> 0x94 @ SRC`8
+	STY {SRC:i16}					=> 0x8C @ SRC[7:0] @ SRC[15:8]
+	
+;------------------------------------------------------------------------------
+	; Store Z
+	STZ <{SRC:i8}					=> 0x64 @ SRC`8
+	STZ <{SRC:i8},X					=> 0x74 @ SRC`8
+	STZ {SRC:i16}					=> 0x9C @ SRC[7:0] @ SRC[15:8]
+	STZ {SRC:i16},X					=> 0x9E @ SRC[7:0] @ SRC[15:8]
+	
+;------------------------------------------------------------------------------
+	; Swap Nibbles
+	SWP A							=> 0x5C @ 0x4B
+	SWP								=> 0x5C @ 0x4B
+	
+;------------------------------------------------------------------------------
+	; Swap X and Y
+	SXY								=> 0x5C @ 0x5B
+	SYX								=> 0x5C @ 0x5B
+	
+;------------------------------------------------------------------------------
+	; Swap X and Z
+	SXZ								=> 0x5C @ 0x6B
+	SZX								=> 0x5C @ 0x6B
+	
+;------------------------------------------------------------------------------
+	; Swap Y and Z
+	SYZ								=> 0x5C @ 0x7B
+	SZY								=> 0x5C @ 0x7B
+	
+;------------------------------------------------------------------------------
+	; Transfer Accumulator to B
+	TAB								=> 0x5B
+	
+;------------------------------------------------------------------------------
+	; Transfer Accumulator to X
+	TAX								=> 0xAA
+	
+;------------------------------------------------------------------------------
+	; Transfer Accumulator to Y
+	TAY								=> 0xA8
+	
+;------------------------------------------------------------------------------
+	; Transfer Accumulator to Z
+	TAZ								=> 0x4B
+	
+;------------------------------------------------------------------------------
+	; Test and Clear memory bit
+	TCB <{SRC:i8}					=> 0x14 @ SRC`8
+	TCB {SRC:i16}					=> 0x1C @ SRC[7:0] @ SRC[15:8]
+	
+	TRB <{SRC:i8}					=> 0x14 @ SRC`8
+	TRB {SRC:i16}					=> 0x1C @ SRC[7:0] @ SRC[15:8]
+	
+;------------------------------------------------------------------------------
+	; Test and Set memory bit
+	TSB <{SRC:i8}					=> 0x04 @ SRC`8
+	TSB {SRC:i16}					=> 0x0C @ SRC[7:0] @ SRC[15:8]
+	
+;------------------------------------------------------------------------------
+	; Transfer Stack Pointer to X
+	TSX								=> 0xBA
+	
+;------------------------------------------------------------------------------
+	; Transfer Stack Pointer to Y
+	TSY								=> 0x0B
+	
+;------------------------------------------------------------------------------
+	; Transfer B to Accumulator
+	TBA								=> 0x7B
+	
+;------------------------------------------------------------------------------
+	; Transfer X to Accumulator
+	TXA								=> 0x8A
+	
+;------------------------------------------------------------------------------
+	; Transfer X to Stack Pointer
+	TXS								=> 0x9A
+	
+;------------------------------------------------------------------------------
+	; Transfer Y to Stack Pointer
+	TYS								=> 0x2B
+	
+;------------------------------------------------------------------------------
+	; Transfer Y to Accumulator
+	TYA								=> 0x98
+	
+;------------------------------------------------------------------------------
+	; Transfer Z to Accumulator
+	TZA								=> 0x6B
+	
+;------------------------------------------------------------------------------
+	; Wait for Interrupt
+	WAI								=> 0x5C @ 0xEF
+	
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

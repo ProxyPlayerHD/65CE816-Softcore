@@ -1,0 +1,54 @@
+
+#include "CPU_65CE02.CPU"	; Tell CASM to which CPU file to use
+
+#bankdef main				; Create a Bank called "main"
+{
+  #addr 0xFC00				; Place it at Address 0xFC00
+  #size 0x0400				; make it 1kB Large
+  #outp 0					; Place it at Address 0 in the output .BIN file
+}
+
+IRQ_HANDLER:
+	NOP
+RTI
+
+NMI_HANDLER:
+	NOP
+RTI
+
+ABT_HANDLER:
+	NOP
+RTI
+
+INIT:				; Initialize the Stack Pointer
+	LDX #0xFF
+	TXS
+	
+START:				; Basic Loop, just increments the contents of the IO Register at 0xDF00
+	JSR WAIT16
+	INC 0xDF00
+BRA START
+
+WAIT16:				; Increments a 16 bit word in Memory until it overflows, then Returns
+	SEC
+	ICC 0x00		; Using some Extended Instructions, because why not?
+	ICC 0x01
+	BCS .EXIT
+BRA WAIT16
+.EXIT:
+RTS
+
+
+
+
+#addr 0xFFF8			; Vector Table
+#d ABT_HANDLER[7:0]		; Abort Vector (Low)
+#d ABT_HANDLER[15:8]	; Abort Vector (High)
+#d NMI_HANDLER[7:0]		; NMI Vector (Low)
+#d NMI_HANDLER[15:8]	; NMI Vector (High)
+#d INIT[7:0]			; Reset Vector (Low)
+#d INIT[15:8]			; Reset Vector (High)
+#d IRQ_HANDLER[7:0]		; IRQ/BRK Vector (Low)
+#d IRQ_HANDLER[15:8]	; IRQ/BRK Vector (High)
+
+

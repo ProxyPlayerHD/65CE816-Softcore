@@ -1,0 +1,6 @@
+# Logisim PLA program table
+xx0 00 # NONE
+001 11 # IRQ/BRK
+011 01 # NMI
+101 00 # ABORT
+111 10 # RESET

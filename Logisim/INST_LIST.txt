@@ -1,0 +1,512 @@
+BRK #
+ORA (bp,x)
+CLE
+SEE
+TSB bp
+ORA bp
+ASL bp
+RMB0 bp
+PHP
+ORA #
+ASL A
+TSY
+TSB a
+ORA a
+ASL a
+BBR0 bp,r
+BPL/BNC r
+ORA (bp),y
+ORA (bp),z
+BPL/BNC rr
+TRB bp
+ORA bp,x
+ASL bp,x
+RMB1 bp
+CLC
+ORA a,y
+INA/INC A
+INZ/INC Z
+TRB a
+ORA a,x
+ASL a,x
+BBR1 bp,r
+JSR a
+AND (bp,x)
+JSR (a)
+JSR (a,x)
+BIT bp
+AND bp
+ROL bp
+RMB2 bp
+PLP
+AND #
+ROL A
+TYS
+BIT a
+AND a
+ROL a
+BBR2 bp,r
+BMI/BNS r
+AND (bp),y
+AND (bp),z
+BMI/BNS rr
+BIT bp,x
+AND bp,x
+ROL bp,x
+RMB3 bp
+SEC
+AND a,y
+DEC A
+DEZ/DEC Z
+BIT a,x
+AND a,x
+ROL a,x
+BBR3 bp,r
+RTI
+XOR (bp,x)
+NEG A
+ASR A
+ASR bp
+XOR bp
+LSR bp
+RMB4 bp
+PHA
+XOR #
+LSR A
+TAZ
+JMP a
+XOR a
+LSR a
+BBR4 bp,r
+BVC r
+XOR (bp),y
+XOR (bp),z
+BVC rr
+ASR bp,x
+XOR bp,x
+LSR bp,x
+RMB5 bp
+CLI
+XOR a,y
+PHY
+TAB
+EXTENDED
+XOR a,x
+LSR a,x
+BBR5 bp,r
+RTS
+ADC (bp,x)
+RTN #
+BSR rr
+STZ bp
+ADC bp
+ROR bp
+RMB6 bp
+PLA
+ADC #
+ROR A
+TZA
+JMP (a)
+ADC a
+ROR a
+BBR6 bp,r
+BVS r
+ADC (bp),y
+ADC (bp),z
+BVS rr
+STZ bp,x
+ADC bp,x
+ROR bp,x
+RMB7 bp
+SEI
+ADC a,y
+PLY
+TBA
+JMP (a,x)
+ADC a,x
+ROR a,x
+BBR7 bp,r
+BRA r
+STA (bp,x)
+STA (d,sp),y
+BRA rr
+STY bp
+STA bp
+STX bp
+SMB0 bp
+DEY/DEC Y
+BIT #
+TXA
+STY a,x
+STY a
+STA a
+STX a
+BBS0 bp,r
+BCC r
+STA (bp),y
+STA (bp),z
+BCC rr
+STY bp,x
+STA bp,x
+STX bp,y
+SMB1 bp
+TYA
+STA a,y
+TXS
+STX a,y
+STZ a
+STA a,x
+STZ a,x
+BBS1 bp,r
+LDY #
+LDA (bp,x)
+LDX #
+LDZ #
+LDY bp
+LDA bp
+LDX bp
+SMB2 bp
+TAY
+LDA #
+TAX
+LDZ a
+LDY a
+LDA a
+LDX a
+BBS2 bp,r
+BCS r
+LDA (bp),y
+LDA (bp),z
+BCS rr
+LDY bp,x
+LDA bp,x
+LDX bp,y
+SMB3 bp
+CLV
+LDA a,y
+TSX
+LDZ a,x
+LDY a,x
+LDA a,x
+LDX a,y
+BBS3 bp,r
+CPY #
+CMP (bp,x)
+CPZ #
+DEW bp
+CPY bp
+CMP bp
+DEC bp
+SMB4 bp
+INY/INC Y
+CMP #
+DEX/DEC X
+ASW/ALW a
+CPY a
+CMP a
+DEC a
+BBS4 bp,r
+BNE/BZC r
+CMP (bp),y
+CMP (bp),z
+BNE/BZC rr
+CPZ bp
+CMP bp,x
+DEC bp,x
+SMB5 bp
+CLD
+CMP a,y
+PHX
+PHZ
+CPZ a
+CMP a,x
+DEC a,x
+BBS5 bp,r
+CPX #
+SBC (bp,x)
+LDA (d,sp),y
+INW bp
+CPX bp
+SBC bp
+INC bp
+SMB6 bp
+INX/INC X
+SBC #
+NOP
+ROW/RLW a
+CPX a
+SBC a
+INC a
+BBS6 bp,r
+BEQ/BZS r
+SBC (bp),y
+SBC (bp),z
+BEQ/BZS rr
+PHW ##
+SBC bp,x
+INC bp,x
+SMB7 bp
+SED
+SBC a,y
+PLX
+PLZ
+PHW a
+SBC a,x
+INC a,x
+BBS7 bp,r
+
+
+
+
+
+MUL bp
+
+
+
+MUL #
+
+
+
+MUL a
+
+
+
+
+
+
+
+MUL bp,x
+
+
+
+MUL a,y
+
+
+
+MUL a,x
+
+
+
+
+
+
+
+MLH bp
+
+
+
+MLH #
+
+
+
+MLH a
+
+
+
+
+
+
+
+MLH bp,x
+
+
+
+MLH a,y
+
+RND
+
+MLH a,x
+
+
+
+
+
+
+
+MOD bp
+
+
+PHR
+MOD #
+
+SWP
+
+MOD a
+
+
+
+
+
+
+
+MOD bp,x
+
+
+
+MOD a,y
+
+SXY
+
+MOD a,x
+
+
+
+
+
+
+
+DIV bp
+
+
+PLR
+DIV #
+
+SXZ
+
+DIV a
+
+
+
+
+
+
+
+DIV bp,x
+
+
+
+DIV a,y
+
+SYZ
+
+DIV a,x
+
+
+
+STA (bp,x),y
+STA sp,y
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+STA pc,xy
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+DCC bp
+
+CBH
+
+LRW a
+ARW a
+
+
+DCC a
+
+
+
+
+
+
+
+DCC bp,x
+
+
+
+
+
+
+
+DCC a,x
+
+
+LDA (bp,x),y
+LDA sp,y
+
+
+
+ICC bp
+
+CHB
+
+
+RRW a
+
+
+ICC a
+WAI
+
+LDA pc,xy
+
+
+
+
+ICC bp,x
+
+
+
+
+
+
+
+ICC a,x
+STP

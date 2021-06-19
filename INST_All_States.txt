@@ -170,3 +170,15 @@ A8	- Write into (SP - 2) from P (B Set)
 A9	- Load into PC from (VECTOR + 1) and TBL; CLR_INT; END
 AA	- Load into A from <ALU> given A and (PC+XY); END
 AB	- Write into (PC+XY) from A; END
+AC	- Load into A from ALU; ----SK0
+AD	- Do an <ALU> Operation with A and (PC - 1)
+AE	- Do an <ALU> Operation with A and (BL/B)
+AF	- Do an <ALU> Operation with A and (BL/B+X)
+B0	- Do an <ALU> Operation with A and (TA)
+B1	- Do an <ALU> Operation with A and (TA+X)
+B2	- Do an <ALU> Operation with A and (TA+Y)
+
+
+
+
+

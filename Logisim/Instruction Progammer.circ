@@ -456,15 +456,15 @@
     </comp>
     <comp lib="1" loc="(1370,750)" name="Splitter">
       <a name="appear" val="center"/>
+      <a name="fanout" val="8"/>
+      <a name="incoming" val="8"/>
+    </comp>
+    <comp lib="1" loc="(1370,750)" name="Splitter">
+      <a name="appear" val="center"/>
       <a name="facing" val="west"/>
       <a name="fanout" val="8"/>
       <a name="incoming" val="8"/>
       <a name="spacing" val="2"/>
-    </comp>
-    <comp lib="1" loc="(1370,750)" name="Splitter">
-      <a name="appear" val="center"/>
-      <a name="fanout" val="8"/>
-      <a name="incoming" val="8"/>
     </comp>
     <comp lib="1" loc="(1370,890)" name="Splitter">
       <a name="appear" val="center"/>
@@ -649,15 +649,15 @@
     </comp>
     <comp lib="1" loc="(1550,530)" name="Splitter">
       <a name="appear" val="center"/>
+      <a name="fanout" val="4"/>
+      <a name="incoming" val="4"/>
+    </comp>
+    <comp lib="1" loc="(1550,530)" name="Splitter">
+      <a name="appear" val="center"/>
       <a name="facing" val="west"/>
       <a name="fanout" val="4"/>
       <a name="incoming" val="4"/>
       <a name="spacing" val="2"/>
-    </comp>
-    <comp lib="1" loc="(1550,530)" name="Splitter">
-      <a name="appear" val="center"/>
-      <a name="fanout" val="4"/>
-      <a name="incoming" val="4"/>
     </comp>
     <comp lib="1" loc="(1550,670)" name="Splitter">
       <a name="appear" val="center"/>
@@ -1892,7 +1892,19 @@ A7	- Write into (TA+Z) from A; ----END
 A8	- Write into (SP - 2) from P (B Set)
 A9	- Load into PC from (VECTOR + 1) and TBL; CLR_INT; END
 AA	- Load into A from &lt;ALU&gt; given A and (PC+XY); END
-AB	- Write into (PC+XY) from A; END</a>
+AB	- Write into (PC+XY) from A; END
+AC	- Load into A from ALU; ----SK0
+AD	- Do an &lt;ALU&gt; Operation with A and (PC - 1)
+AE	- Do an &lt;ALU&gt; Operation with A and (BL/B)
+AF	- Do an &lt;ALU&gt; Operation with A and (BL/B+X)
+B0	- Do an &lt;ALU&gt; Operation with A and (TA)
+B1	- Do an &lt;ALU&gt; Operation with A and (TA+X)
+B2	- Do an &lt;ALU&gt; Operation with A and (TA+Y)
+
+
+
+
+</a>
       <a name="lines" val="1"/>
     </comp>
     <comp lib="6" loc="(480,1370)" name="FileViewer">
@@ -2240,7 +2252,8 @@ c0b218 c01218 c02218 4c00200 4c00210 c70600 c70800 4000000
 b0a0 b040 b020 b000 b000 b0a0 b120 e000b120
 b0e0 b040 b060 b080 c000 200010e0 1000 10c0
 10c0 1040 1060 1080 2000 20c0 2060 2080
-3000 3040 4000 b0a0 700f000 80a218 a000
+3000 3040 4000 b0a0 700f000 80a218 a000 800200
+e0000018 5018 6018 1018 2018 3018 76*0 4000000
 </a>
       </state>
       <state path="/RAM@(940,700)">
@@ -2259,7 +2272,7 @@ c80 c80 c80 c00 4 880 880 880
 e e e d c0b c02 100 830
 30 830 830 8*810 4*1f 1e 1e 1d
 1c 8*10 810 830 810 30 830 4*810
-830 5*810 5e a00 880 810
+830 5*810 5e a00 880 810 c00 6*80
 </a>
       </state>
     </simulation>

@@ -271,16 +271,6 @@ module DIG_Mul_unsigned #(
     assign mul = a * b;
 endmodule
 
-
-module DIG_Div_unsigned (
-  input [7:0] a, // a input
-  input [7:0] b, // b input
-  output [7:0] q,
-  output [7:0] r
-);
-  assign q = a;
-  assign r = b;
-endmodule
 module DIG_ROM_512X17_ALU (
     input [8:0] A,
     input sel,
@@ -1166,6 +1156,276 @@ module CE_NZ (
   assign Q = (IN[0] | IN[1] | IN[2] | IN[3] | IN[4] | IN[5] | IN[6] | IN[7]);
 endmodule
 
+module DIG_Register_BUS #(
+    parameter Bits = 1
+)
+(
+    input C,
+    input en,
+    input [(Bits - 1):0]D,
+    output [(Bits - 1):0]Q
+);
+
+    reg [(Bits - 1):0] state = 'h0;
+
+    assign Q = state;
+
+    always @ (posedge C) begin
+        if (en)
+            state <= D;
+   end
+endmodule
+
+module DIG_Sub #(
+    parameter Bits = 2
+)
+(
+    input [(Bits-1):0] a,
+    input [(Bits-1):0] b,
+    input c_i,
+    output [(Bits-1):0] s,
+    output c_o
+);
+    wire [Bits:0] temp;
+
+    assign temp = a - b - c_i;
+    assign s = temp[(Bits-1):0];
+    assign c_o = temp[Bits];
+endmodule
+
+module DIG_JK_FF
+#(
+    parameter Default = 1'b0
+)
+(
+   input J,
+   input C,
+   input K,
+   output Q,
+   output \~Q
+);
+    reg state;
+
+    assign Q = state;
+    assign \~Q = ~state;
+
+    always @ (posedge C) begin
+        if (~J & K)
+            state <= 1'b0;
+         else if (J & ~K)
+            state <= 1'b1;
+         else if (J & K)
+            state <= ~state;
+    end
+
+    initial begin
+        state = Default;
+    end
+endmodule
+
+
+module DIG_Counter_Nbit
+#(
+    parameter Bits = 2
+)
+(
+    output [(Bits-1):0] out,
+    output ovf,
+    input C,
+    input en,
+    input clr
+);
+    reg [(Bits-1):0] count;
+
+    always @ (posedge C) begin
+        if (clr)
+          count <= 'h0;
+        else if (en)
+          count <= count + 1'b1;
+    end
+
+    assign out = count;
+    assign ovf = en? &count : 1'b0;
+
+    initial begin
+        count = 'h0;
+    end
+endmodule
+
+
+module DIG_Div_unsigned (
+  input [7:0] AI_UD, // Dividend
+  input [7:0] BI_UD, // Divisor
+  input C_UD,
+  input nC_UD,
+  input EN_UD, // Enable
+  input R_UD, // Reset
+  output [7:0] QO_UD, // Quotient
+  output [7:0] RO_UD, // Remainder
+  output BY_UD, // Busy (ie State Machine is still running)
+  output DONE_UD // Used to Update Flags
+
+);
+  wire [7:0] QO_UD_temp;
+  wire [7:0] RO_UD_temp;
+  wire [7:0] s0;
+  wire s1;
+  wire [7:0] s2;
+  wire [7:0] X;
+  wire [7:0] s3;
+  wire RUN;
+  wire [7:0] s4;
+  wire [7:0] s5;
+  wire [7:0] s6;
+  wire const1b0;
+  wire [7:0] s7;
+  wire [16:0] s8;
+  wire s9;
+  wire DIS;
+  wire nRUN;
+  wire [2:0] s10;
+  wire DONE_UD_temp;
+  wire s11;
+  wire [8:0] s12;
+  wire [7:0] s13;
+  wire [7:0] s14;
+  wire s15;
+  wire s16;
+  assign const1b0 = 1'b0;
+  // B_DIV
+  DIG_Register_BUS #(
+    .Bits(8)
+  )
+  DIG_Register_BUS_i0 (
+    .D( BI_UD ),
+    .C( nC_UD ),
+    .en( EN_UD ),
+    .Q( s14 )
+  );
+  Mux_2x1_NBits #(
+    .Bits(8)
+  )
+  Mux_2x1_NBits_i1 (
+    .sel( RUN ),
+    .in_0( AI_UD ),
+    .in_1( s5 ),
+    .out( s2 )
+  );
+  assign s8[0] = const1b0;
+  assign s8[8:1] = X;
+  assign s8[16:9] = RO_UD_temp;
+  assign s1 = (EN_UD | RUN);
+  DIG_Sub #(
+    .Bits(8)
+  )
+  DIG_Sub_i2 (
+    .a( s7 ),
+    .b( s14 ),
+    .c_i( 1'b0 ),
+    .s( s13 ),
+    .c_o( s15 )
+  );
+  assign s9 = (EN_UD & ~ DIS);
+  assign DIS = (R_UD | DONE_UD_temp);
+  // X_DIV
+  DIG_Register_BUS #(
+    .Bits(8)
+  )
+  DIG_Register_BUS_i3 (
+    .D( s2 ),
+    .C( nC_UD ),
+    .en( s1 ),
+    .Q( X )
+  );
+  // RUN
+  DIG_JK_FF #(
+    .Default(0)
+  )
+  DIG_JK_FF_i4 (
+    .J( s9 ),
+    .C( nC_UD ),
+    .K( DIS ),
+    .Q( RUN ),
+    .\~Q ( nRUN )
+  );
+  assign s11 = ~ s15;
+  DIG_D_FF_1bit #(
+    .Default(0)
+  )
+  DIG_D_FF_1bit_i5 (
+    .D( s1 ),
+    .C( C_UD ),
+    .Q( s16 )
+  );
+  assign s5 = s8[7:0];
+  assign s7 = s8[15:8];
+  // DIV_C
+  DIG_Counter_Nbit #(
+    .Bits(3)
+  )
+  DIG_Counter_Nbit_i6 (
+    .en( RUN ),
+    .C( nC_UD ),
+    .clr( DIS ),
+    .out( s10 )
+  );
+  Mux_2x1_NBits #(
+    .Bits(8)
+  )
+  Mux_2x1_NBits_i7 (
+    .sel( s11 ),
+    .in_0( s7 ),
+    .in_1( s13 ),
+    .out( s4 )
+  );
+  assign BY_UD = (s1 | s16);
+  Mux_2x1_NBits #(
+    .Bits(8)
+  )
+  Mux_2x1_NBits_i8 (
+    .sel( RUN ),
+    .in_0( 8'b0 ),
+    .in_1( s4 ),
+    .out( s0 )
+  );
+  assign DONE_UD_temp = (s10[0] & s10[1] & s10[2]);
+  // R_DIV
+  DIG_Register_BUS #(
+    .Bits(8)
+  )
+  DIG_Register_BUS_i9 (
+    .D( s0 ),
+    .C( nC_UD ),
+    .en( s1 ),
+    .Q( RO_UD_temp )
+  );
+  // Q_DIV
+  DIG_Register_BUS #(
+    .Bits(8)
+  )
+  DIG_Register_BUS_i10 (
+    .D( s3 ),
+    .C( nC_UD ),
+    .en( s1 ),
+    .Q( QO_UD_temp )
+  );
+  Mux_2x1_NBits #(
+    .Bits(8)
+  )
+  Mux_2x1_NBits_i11 (
+    .sel( RUN ),
+    .in_0( 8'b0 ),
+    .in_1( s6 ),
+    .out( s3 )
+  );
+  assign s12[0] = s11;
+  assign s12[8:1] = QO_UD_temp;
+  assign s6 = s12[7:0];
+  assign QO_UD = QO_UD_temp;
+  assign RO_UD = RO_UD_temp;
+  assign DONE_UD = DONE_UD_temp;
+endmodule
+
 module CE_ASR (
   input [15:0] IN, // Input
   input SEL, // 8/16 bit Select
@@ -1903,21 +2163,19 @@ module CE_SRR (
 endmodule
 
 module CE_M_ALU (
-  input R_A, // Reset
-  input nC_A,
   input [7:0] ALA_A, // A Input
   input [15:0] ALB_A, // B Input
   input [9:0] A_CTRL_A, // ALU Control
   input SOB_A, // Set Overflow... Bit?
   input CIB_A, // Clear Interrupt Bit
+  input R_A, // Reset
+  input nC_A,
+  input C_A,
+  input ABT_A, // Abort Input
   output [15:0] ALO_A, // Output
-  output [6:0] FLO_A // Flag output
-
+  output [6:0] FLO_A, // Flag output
+  output BY_A
 );
-  wire [7:0] B;
-  wire [7:0] BH;
-  wire E;
-  wire [8:0] OPC;
   wire CO;
   wire ZO;
   wire nIO;
@@ -1929,6 +2187,7 @@ module CE_M_ALU (
   wire [7:0] QH;
   wire SL0;
   wire [7:0] Q;
+  wire [7:0] B;
   wire [6:0] s1;
   wire s2;
   wire s3;
@@ -1964,10 +2223,11 @@ module CE_M_ALU (
   wire [3:0] SL1;
   wire [3:0] SL2;
   wire [6:0] SL4;
+  wire s21;
+  wire [8:0] OPC;
   wire AZS;
-  wire [7:0] s21;
-  wire [7:0] ANDQ;
   wire [7:0] s22;
+  wire [7:0] ANDQ;
   wire [7:0] s23;
   wire [7:0] s24;
   wire [7:0] s25;
@@ -1981,7 +2241,7 @@ module CE_M_ALU (
   wire [7:0] s33;
   wire [7:0] s34;
   wire [7:0] s35;
-  wire s36;
+  wire [7:0] s36;
   wire s37;
   wire s38;
   wire s39;
@@ -1991,16 +2251,16 @@ module CE_M_ALU (
   wire s43;
   wire s44;
   wire s45;
+  wire s46;
   wire [2:0] QHS;
-  wire [7:0] s46;
   wire [7:0] s47;
   wire [7:0] s48;
   wire [7:0] s49;
   wire [7:0] s50;
-  wire s51;
-  wire [7:0] s52;
-  wire [2:0] s53;
-  wire s54;
+  wire [7:0] s51;
+  wire s52;
+  wire [7:0] s53;
+  wire [2:0] s54;
   wire s55;
   wire s56;
   wire s57;
@@ -2011,60 +2271,61 @@ module CE_M_ALU (
   wire s62;
   wire s63;
   wire s64;
-  wire [15:0] s65;
-  wire s66;
+  wire s65;
+  wire [15:0] s66;
   wire s67;
   wire s68;
   wire s69;
   wire s70;
   wire s71;
   wire s72;
+  wire DONE;
   wire s73;
   wire s74;
   wire s75;
+  wire s76;
+  wire s77;
+  wire s78;
+  wire E;
+  wire [7:0] BH;
+  assign s72 = (ABT_A | R_A);
   assign B = ALB_A[7:0];
   assign BH = ALB_A[15:8];
   assign E = A_CTRL_A[0];
   assign OPC = A_CTRL_A[9:1];
   assign nD2 = ~ B[2];
   assign ANDQ = (ALA_A & B);
-  assign s26 = (ALA_A ^ B);
+  assign s27 = (ALA_A ^ B);
   DIG_Mul_unsigned #(
     .Bits(8)
   )
   DIG_Mul_unsigned_i0 (
     .a( ALA_A ),
     .b( B ),
-    .mul( s65 )
-  );
-  DIG_Div_unsigned DIG_Div_unsigned_i1 (
-    .a( ALA_A ),
-    .b( B ),
-    .q( s32 ),
-    .r( s33 )
+    .mul( s66 )
   );
   assign AZS = ((~ OPC[0] & ~ OPC[1] & OPC[2] & ~ OPC[3] & ~ OPC[4] & ~ OPC[5] & ~ OPC[6] & ~ OPC[7] & ~ OPC[8]) | (~ OPC[0] & ~ OPC[1] & OPC[2] & OPC[3] & ~ OPC[4] & ~ OPC[5] & ~ OPC[6] & ~ OPC[7] & ~ OPC[8]) | (~ OPC[0] & ~ OPC[1] & OPC[2] & ~ OPC[3] & OPC[4] & ~ OPC[5] & ~ OPC[6] & ~ OPC[7] & ~ OPC[8]) | (~ OPC[0] & ~ OPC[1] & OPC[2] & OPC[3] & OPC[4] & ~ OPC[5] & ~ OPC[6] & ~ OPC[7] & ~ OPC[8]) | (OPC[0] & OPC[1] & OPC[2] & ~ OPC[3] & ~ OPC[8]));
-  assign s70 = (OPC[0] & OPC[1] & ~ OPC[2] & ~ OPC[3] & ~ OPC[4] & OPC[6] & OPC[7] & ~ OPC[8]);
-  assign s71 = (OPC[0] & OPC[1] & ~ OPC[2] & OPC[3] & ~ OPC[4] & ~ OPC[5] & OPC[6] & OPC[7] & ~ OPC[8]);
-  assign s72 = (OPC[0] & OPC[1] & ~ OPC[2] & OPC[3] & ~ OPC[4] & ~ OPC[5] & OPC[6] & OPC[7] & OPC[8]);
-  assign s73 = (~ OPC[0] & OPC[1] & ~ OPC[2] & OPC[3] & ~ OPC[4] & ~ OPC[5] & OPC[6] & OPC[7] & OPC[8]);
-  assign s74 = (OPC[0] & OPC[1] & ~ OPC[2] & OPC[3] & ~ OPC[4] & OPC[5] & OPC[6] & OPC[7] & OPC[8]);
-  assign s75 = (OPC[0] & OPC[1] & ~ OPC[2] & OPC[3] & ~ OPC[4] & OPC[5] & OPC[6] & OPC[7] & ~ OPC[8]);
+  assign s73 = (OPC[0] & OPC[1] & ~ OPC[2] & ~ OPC[3] & ~ OPC[4] & OPC[6] & OPC[7] & ~ OPC[8]);
+  assign s74 = (OPC[0] & OPC[1] & ~ OPC[2] & OPC[3] & ~ OPC[4] & ~ OPC[5] & OPC[6] & OPC[7] & ~ OPC[8]);
+  assign s75 = (OPC[0] & OPC[1] & ~ OPC[2] & OPC[3] & ~ OPC[4] & ~ OPC[5] & OPC[6] & OPC[7] & OPC[8]);
+  assign s76 = (~ OPC[0] & OPC[1] & ~ OPC[2] & OPC[3] & ~ OPC[4] & ~ OPC[5] & OPC[6] & OPC[7] & OPC[8]);
+  assign s77 = (OPC[0] & OPC[1] & ~ OPC[2] & OPC[3] & ~ OPC[4] & OPC[5] & OPC[6] & OPC[7] & OPC[8]);
+  assign s78 = (OPC[0] & OPC[1] & ~ OPC[2] & OPC[3] & ~ OPC[4] & OPC[5] & OPC[6] & OPC[7] & ~ OPC[8]);
   // ALU
-  DIG_ROM_512X17_ALU DIG_ROM_512X17_ALU_i2 (
+  DIG_ROM_512X17_ALU DIG_ROM_512X17_ALU_i1 (
     .A( OPC ),
     .sel( 1'b1 ),
     .D( s20 )
   );
-  CE_CBH CE_CBH_i3 (
+  CE_CBH CE_CBH_i2 (
+    .I( B ),
+    .Q( s36 ),
+    .C_O( s46 )
+  );
+  CE_CHB CE_CHB_i3 (
     .I( B ),
     .Q( s35 ),
     .C_O( s45 )
-  );
-  CE_CHB CE_CHB_i4 (
-    .I( B ),
-    .Q( s34 ),
-    .C_O( s44 )
   );
   assign D0 = B[0];
   assign D1 = B[1];
@@ -2073,85 +2334,68 @@ module CE_M_ALU (
   assign D5 = B[5];
   assign D6 = B[6];
   assign D7 = B[7];
-  assign s53 = OPC[6:4];
-  Decoder3 Decoder3_i5 (
-    .sel( s53 ),
-    .out_0( s54 ),
-    .out_1( s55 ),
-    .out_2( s56 ),
-    .out_3( s57 ),
-    .out_4( s58 ),
-    .out_5( s59 ),
-    .out_6( s60 ),
-    .out_7( s61 )
+  assign s54 = OPC[6:4];
+  Decoder3 Decoder3_i4 (
+    .sel( s54 ),
+    .out_0( s55 ),
+    .out_1( s56 ),
+    .out_2( s57 ),
+    .out_3( s58 ),
+    .out_4( s59 ),
+    .out_5( s60 ),
+    .out_6( s61 ),
+    .out_7( s62 )
   );
   assign s10[0] = s20[9];
   assign s10[1] = (~ OPC[0] & ~ OPC[1] & ~ OPC[2] & OPC[3] & ~ OPC[4] & OPC[5] & ~ OPC[6] & ~ OPC[7] & ~ OPC[8]);
-  PriorityEncoder3 PriorityEncoder3_i6 (
+  PriorityEncoder3 PriorityEncoder3_i5 (
     .in0( 1'b0 ),
-    .in1( s70 ),
-    .in2( s71 ),
-    .in3( s72 ),
-    .in4( s73 ),
-    .in5( s74 ),
-    .in6( s75 ),
+    .in1( s73 ),
+    .in2( s74 ),
+    .in3( s75 ),
+    .in4( s76 ),
+    .in5( s77 ),
+    .in6( s78 ),
     .in7( 1'b0 ),
     .num( QHS )
-  );
-  CE_NZ CE_NZ_i7 (
-    .IN( s32 ),
-    .Q( s43 )
-  );
-  CE_NZ CE_NZ_i8 (
-    .IN( s33 ),
-    .Q( s42 )
   );
   assign SL0 = s20[0];
   assign SL1 = s20[4:1];
   assign SL2 = s20[8:5];
   assign SL4 = s20[16:10];
-  assign s30 = s65[7:0];
-  assign s31 = s65[15:8];
-  Mux_2x1_NBits #(
-    .Bits(7)
-  )
-  Mux_2x1_NBits_i9 (
-    .sel( E ),
-    .in_0( 7'b0 ),
-    .in_1( SL4 ),
-    .out( s1 )
+  assign s31 = s66[7:0];
+  assign s32 = s66[15:8];
+  assign s53[0] = s55;
+  assign s53[1] = s56;
+  assign s53[2] = s57;
+  assign s53[3] = s58;
+  assign s53[4] = s59;
+  assign s53[5] = s60;
+  assign s53[6] = s61;
+  assign s53[7] = s62;
+  assign s67 = ((~ SL2[0] & ~ SL2[1] & ~ SL2[2] & SL2[3]) | (SL2[0] & ~ SL2[1] & ~ SL2[2] & SL2[3]));
+  CE_NZ CE_NZ_i6 (
+    .IN( s31 ),
+    .Q( s42 )
   );
-  assign s52[0] = s54;
-  assign s52[1] = s55;
-  assign s52[2] = s56;
-  assign s52[3] = s57;
-  assign s52[4] = s58;
-  assign s52[5] = s59;
-  assign s52[6] = s60;
-  assign s52[7] = s61;
-  assign s66 = ((~ SL2[0] & ~ SL2[1] & ~ SL2[2] & SL2[3]) | (SL2[0] & ~ SL2[1] & ~ SL2[2] & SL2[3]));
-  CE_NZ CE_NZ_i10 (
-    .IN( s30 ),
+  CE_NZ CE_NZ_i7 (
+    .IN( s32 ),
     .Q( s41 )
   );
-  CE_NZ CE_NZ_i11 (
-    .IN( s31 ),
-    .Q( s40 )
-  );
+  assign s71 = ((~ SL2[0] & ~ SL2[1] & SL2[2] & SL2[3] & E) | (SL2[0] & ~ SL2[1] & SL2[2] & SL2[3] & E));
   assign s15 = s10[1];
   assign s17 = s10[1];
-  assign s51 = SL1[0];
-  assign s62 = SL1[1];
+  assign s52 = SL1[0];
   assign s63 = SL1[1];
   assign s64 = SL1[1];
-  assign s9 = (s1[5] | SOB_A);
-  Mux_2x1 Mux_2x1_i12 (
+  assign s65 = SL1[1];
+  Mux_2x1 Mux_2x1_i8 (
     .sel( s15 ),
     .in_0( SL0 ),
     .in_1( D3 ),
     .out( s16 )
   );
-  Mux_2x1 Mux_2x1_i13 (
+  Mux_2x1 Mux_2x1_i9 (
     .sel( s17 ),
     .in_0( SL0 ),
     .in_1( nD2 ),
@@ -2160,48 +2404,79 @@ module CE_M_ALU (
   Mux_2x1_NBits #(
     .Bits(8)
   )
-  Mux_2x1_NBits_i14 (
-    .sel( s51 ),
+  Mux_2x1_NBits_i10 (
+    .sel( s52 ),
     .in_0( ALA_A ),
-    .in_1( s52 ),
-    .out( s50 )
+    .in_1( s53 ),
+    .out( s51 )
   );
-  assign s69 = (s1[2] | CIB_A);
-  CE_ASR CE_ASR_i15 (
+  DIG_Div_unsigned DIG_Div_unsigned_i11 (
+    .AI_UD( ALA_A ),
+    .BI_UD( B ),
+    .C_UD( C_A ),
+    .nC_UD( nC_A ),
+    .EN_UD( s71 ),
+    .R_UD( s72 ),
+    .QO_UD( s33 ),
+    .RO_UD( s34 ),
+    .BY_UD( BY_A ),
+    .DONE_UD( DONE )
+  );
+  CE_ASR CE_ASR_i12 (
     .IN( ALB_A ),
-    .SEL( s64 ),
-    .C_o( s38 ),
-    .Q( s28 ),
-    .QH( s48 )
+    .SEL( s65 ),
+    .C_o( s39 ),
+    .Q( s29 ),
+    .QH( s49 )
   );
+  assign s25 = (~ s51 & B);
+  assign s26 = (s51 | B);
+  assign s69 = (s18 | CIB_A);
+  CE_NZ CE_NZ_i13 (
+    .IN( s33 ),
+    .Q( s44 )
+  );
+  CE_NZ CE_NZ_i14 (
+    .IN( s34 ),
+    .Q( s43 )
+  );
+  assign s21 = (DONE | E);
+  Mux_2x1_NBits #(
+    .Bits(7)
+  )
+  Mux_2x1_NBits_i15 (
+    .sel( s21 ),
+    .in_0( 7'b0 ),
+    .in_1( SL4 ),
+    .out( s1 )
+  );
+  assign s9 = (s1[5] | SOB_A);
+  assign s70 = (s1[2] | CIB_A);
   assign s2 = s1[0];
   assign s3 = s1[1];
   assign s4 = s1[3];
   assign s5 = s1[4];
   assign s6 = s1[6];
-  assign s24 = (~ s50 & B);
-  assign s25 = (s50 | B);
-  assign s68 = (s18 | CIB_A);
   CE_DFF CE_DFF_i16 (
+    .C( nC_A ),
+    .D( s69 ),
+    .E( s70 ),
+    .R( R_A ),
+    .nQ( nIO )
+  );
+  CE_DFF CE_DFF_i17 (
     .C( nC_A ),
     .D( s16 ),
     .E( s4 ),
     .R( R_A ),
     .Q( DO )
   );
-  CE_DFF CE_DFF_i17 (
+  CE_DFF CE_DFF_i18 (
     .C( nC_A ),
     .D( SL0 ),
     .E( s5 ),
     .R( R_A ),
     .nQ( nEO )
-  );
-  CE_DFF CE_DFF_i18 (
-    .C( nC_A ),
-    .D( s68 ),
-    .E( s69 ),
-    .R( R_A ),
-    .nQ( nIO )
   );
   assign FLO_A[0] = CO;
   assign FLO_A[1] = ZO;
@@ -2269,9 +2544,9 @@ module CE_M_ALU (
   )
   Mux_2x1_NBits_i26 (
     .sel( AZS ),
-    .in_0( s21 ),
+    .in_0( s22 ),
     .in_1( ANDQ ),
-    .out( s22 )
+    .out( s23 )
   );
   Mux_2x1_NBits #(
     .Bits(8)
@@ -2280,49 +2555,49 @@ module CE_M_ALU (
     .sel( SL0 ),
     .in_0( Q ),
     .in_1( B ),
-    .out( s21 )
+    .out( s22 )
   );
   Mux_16x1_NBits #(
     .Bits(8)
   )
   Mux_16x1_NBits_i28 (
     .sel( SL2 ),
-    .in_0( s23 ),
+    .in_0( s24 ),
     .in_1( ANDQ ),
-    .in_2( s24 ),
-    .in_3( s25 ),
-    .in_4( s26 ),
-    .in_5( s27 ),
-    .in_6( s28 ),
-    .in_7( s29 ),
-    .in_8( s27 ),
-    .in_9( s29 ),
-    .in_10( s30 ),
-    .in_11( s31 ),
-    .in_12( s32 ),
-    .in_13( s33 ),
-    .in_14( s34 ),
-    .in_15( s35 ),
+    .in_2( s25 ),
+    .in_3( s26 ),
+    .in_4( s27 ),
+    .in_5( s28 ),
+    .in_6( s29 ),
+    .in_7( s30 ),
+    .in_8( s28 ),
+    .in_9( s30 ),
+    .in_10( s31 ),
+    .in_11( s32 ),
+    .in_12( s33 ),
+    .in_13( s34 ),
+    .in_14( s35 ),
+    .in_15( s36 ),
     .out( Q )
   );
   Mux_16x1 Mux_16x1_i29 (
     .sel( SL2 ),
-    .in_0( s36 ),
+    .in_0( s37 ),
     .in_1( 1'b0 ),
     .in_2( 1'b0 ),
     .in_3( 1'b0 ),
     .in_4( 1'b0 ),
-    .in_5( s37 ),
-    .in_6( s38 ),
-    .in_7( s39 ),
-    .in_8( s37 ),
-    .in_9( s39 ),
-    .in_10( s40 ),
-    .in_11( s41 ),
-    .in_12( s42 ),
-    .in_13( s43 ),
-    .in_14( s44 ),
-    .in_15( s45 ),
+    .in_5( s38 ),
+    .in_6( s39 ),
+    .in_7( s40 ),
+    .in_8( s38 ),
+    .in_9( s40 ),
+    .in_10( s41 ),
+    .in_11( s42 ),
+    .in_12( s43 ),
+    .in_13( s44 ),
+    .in_14( s45 ),
+    .in_15( s46 ),
     .out( CI )
   );
   Mux_8x1_NBits #(
@@ -2331,20 +2606,20 @@ module CE_M_ALU (
   Mux_8x1_NBits_i30 (
     .sel( QHS ),
     .in_0( 8'b0 ),
-    .in_1( s46 ),
-    .in_2( s47 ),
-    .in_3( s48 ),
-    .in_4( s49 ),
-    .in_5( s47 ),
-    .in_6( s49 ),
+    .in_1( s47 ),
+    .in_2( s48 ),
+    .in_3( s49 ),
+    .in_4( s50 ),
+    .in_5( s48 ),
+    .in_6( s50 ),
     .in_7( 8'b0 ),
     .out( QH )
   );
   Mux_2x1 Mux_2x1_i31 (
-    .sel( s66 ),
+    .sel( s67 ),
     .in_0( 1'b0 ),
     .in_1( CO ),
-    .out( s67 )
+    .out( s68 )
   );
   CE_DFF CE_DFF_i32 (
     .C( nC_A ),
@@ -2381,30 +2656,30 @@ module CE_M_ALU (
     .CI_AD( CO ),
     .S_AD( SL1 ),
     .VO_AD( VI ),
-    .CO_AD( s36 ),
-    .Q_AD( s23 ),
-    .QH_AD( s46 )
+    .CO_AD( s37 ),
+    .Q_AD( s24 ),
+    .QH_AD( s47 )
   );
   CE_SRL CE_SRL_i37 (
-    .C_i( s67 ),
-    .IN( ALB_A ),
-    .SEL( s62 ),
-    .C_o( s37 ),
-    .Q( s27 ),
-    .QH( s47 )
-  );
-  CE_SRR CE_SRR_i38 (
-    .C_i( s67 ),
+    .C_i( s68 ),
     .IN( ALB_A ),
     .SEL( s63 ),
-    .C_o( s39 ),
-    .Q( s29 ),
-    .QH( s49 )
+    .C_o( s38 ),
+    .Q( s28 ),
+    .QH( s48 )
+  );
+  CE_SRR CE_SRR_i38 (
+    .C_i( s68 ),
+    .IN( ALB_A ),
+    .SEL( s64 ),
+    .C_o( s40 ),
+    .Q( s30 ),
+    .QH( s50 )
   );
   assign ALO_A[7:0] = s0;
   assign ALO_A[15:8] = QH;
-  assign NI = s22[7];
-  assign ZI = ~ (s22[0] | s22[1] | s22[2] | s22[3] | s22[4] | s22[5] | s22[6] | NI);
+  assign NI = s23[7];
+  assign ZI = ~ (s23[0] | s23[1] | s23[2] | s23[3] | s23[4] | s23[5] | s23[6] | NI);
 endmodule
 module DIG_BitExtender #(
     parameter inputBits = 2,
@@ -2478,25 +2753,19 @@ module DIG_ROM_16X5_AOS (
 endmodule
 
 
-module DIG_Register_BUS #(
-    parameter Bits = 1
-)
-(
-    input C,
-    input en,
-    input [(Bits - 1):0]D,
-    output [(Bits - 1):0]Q
+module Decoder2 (
+    output out_0,
+    output out_1,
+    output out_2,
+    output out_3,
+    input [1:0] sel
 );
-
-    reg [(Bits - 1):0] state = 'h0;
-
-    assign Q = state;
-
-    always @ (posedge C) begin
-        if (en)
-            state <= D;
-   end
+    assign out_0 = (sel == 2'h0)? 1'b1 : 1'b0;
+    assign out_1 = (sel == 2'h1)? 1'b1 : 1'b0;
+    assign out_2 = (sel == 2'h2)? 1'b1 : 1'b0;
+    assign out_3 = (sel == 2'h3)? 1'b1 : 1'b0;
 endmodule
+
 
 module CE_PRE (
   input R,
@@ -2552,20 +2821,6 @@ module CE_PRE (
     .out( s4 )
   );
 endmodule
-
-module Decoder2 (
-    output out_0,
-    output out_1,
-    output out_2,
-    output out_3,
-    input [1:0] sel
-);
-    assign out_0 = (sel == 2'h0)? 1'b1 : 1'b0;
-    assign out_1 = (sel == 2'h1)? 1'b1 : 1'b0;
-    assign out_2 = (sel == 2'h2)? 1'b1 : 1'b0;
-    assign out_3 = (sel == 2'h3)? 1'b1 : 1'b0;
-endmodule
-
 
 module DIG_Neg #(
     parameter Bits = 1
@@ -2795,22 +3050,24 @@ module CE_M_REGS (
   );
   assign s44[0] = s45;
   assign s44[1] = s45;
-  // TAH
-  CE_PRE CE_PRE_i7 (
-    .R( R_R ),
+  // TAH_R
+  DIG_Register_BUS #(
+    .Bits(8)
+  )
+  DIG_Register_BUS_i7 (
+    .D( DI_R ),
     .C( nC_R ),
-    .L( s10 ),
-    .IN( DI_R ),
-    .PR( 8'b0 ),
+    .en( s10 ),
     .Q( s14 )
   );
-  // TAL
-  CE_PRE CE_PRE_i8 (
-    .R( R_R ),
+  // TAL_R
+  DIG_Register_BUS #(
+    .Bits(8)
+  )
+  DIG_Register_BUS_i8 (
+    .D( DI_R ),
     .C( nC_R ),
-    .L( s11 ),
-    .IN( DI_R ),
-    .PR( 8'b0 ),
+    .en( s11 ),
     .Q( TAL )
   );
   assign OFS8 = OFS[7:0];
@@ -2835,13 +3092,14 @@ module CE_M_REGS (
   );
   assign s41 = (s44 | s35[4:3]);
   assign s46 = (s36[0] & ~ s36[1]);
-  // TBH
-  CE_PRE CE_PRE_i11 (
-    .R( R_R ),
+  // TBH_R
+  DIG_Register_BUS #(
+    .Bits(8)
+  )
+  DIG_Register_BUS_i11 (
+    .D( s16 ),
     .C( nC_R ),
-    .L( LBH ),
-    .IN( s16 ),
-    .PR( 8'b0 ),
+    .en( LBH ),
     .Q( TBH )
   );
   assign VPA_R = (~ s37 & s40);
@@ -3147,62 +3405,8 @@ module CE_M_REGS (
     .in_1( s61 ),
     .out( s39 )
   );
-  // A
+  // SPH_R
   CE_PRE CE_PRE_i41 (
-    .R( R_R ),
-    .C( nC_R ),
-    .L( s6 ),
-    .IN( \REG  ),
-    .PR( 8'b0 ),
-    .Q( A )
-  );
-  // B
-  CE_PRE CE_PRE_i42 (
-    .R( R_R ),
-    .C( nC_R ),
-    .L( s7 ),
-    .IN( s13 ),
-    .PR( 8'b0 ),
-    .Q( B )
-  );
-  // X
-  CE_PRE CE_PRE_i43 (
-    .R( R_R ),
-    .C( nC_R ),
-    .L( s8 ),
-    .IN( \REG  ),
-    .PR( 8'b0 ),
-    .Q( X )
-  );
-  // Y
-  CE_PRE CE_PRE_i44 (
-    .R( R_R ),
-    .C( nC_R ),
-    .L( YEN ),
-    .IN( \REG  ),
-    .PR( 8'b0 ),
-    .Q( Y )
-  );
-  // Z
-  CE_PRE CE_PRE_i45 (
-    .R( R_R ),
-    .C( nC_R ),
-    .L( s9 ),
-    .IN( \REG  ),
-    .PR( 8'b0 ),
-    .Q( Z )
-  );
-  // TBL
-  CE_PRE CE_PRE_i46 (
-    .R( R_R ),
-    .C( nC_R ),
-    .L( LBL ),
-    .IN( s17 ),
-    .PR( 8'b0 ),
-    .Q( TBL )
-  );
-  // SPH
-  CE_PRE CE_PRE_i47 (
     .R( R_R ),
     .C( nC_R ),
     .L( LSH ),
@@ -3210,7 +3414,67 @@ module CE_M_REGS (
     .PR( 8'b1 ),
     .Q( SPH )
   );
-  // SPL
+  // A_R
+  DIG_Register_BUS #(
+    .Bits(8)
+  )
+  DIG_Register_BUS_i42 (
+    .D( \REG  ),
+    .C( nC_R ),
+    .en( s6 ),
+    .Q( A )
+  );
+  // B_R
+  DIG_Register_BUS #(
+    .Bits(8)
+  )
+  DIG_Register_BUS_i43 (
+    .D( s13 ),
+    .C( nC_R ),
+    .en( s7 ),
+    .Q( B )
+  );
+  // X_R
+  DIG_Register_BUS #(
+    .Bits(8)
+  )
+  DIG_Register_BUS_i44 (
+    .D( \REG  ),
+    .C( nC_R ),
+    .en( s8 ),
+    .Q( X )
+  );
+  // Y_R
+  DIG_Register_BUS #(
+    .Bits(8)
+  )
+  DIG_Register_BUS_i45 (
+    .D( \REG  ),
+    .C( nC_R ),
+    .en( YEN ),
+    .Q( Y )
+  );
+  // Z_R
+  DIG_Register_BUS #(
+    .Bits(8)
+  )
+  DIG_Register_BUS_i46 (
+    .D( \REG  ),
+    .C( nC_R ),
+    .en( s9 ),
+    .Q( Z )
+  );
+  // TBL_R
+  DIG_Register_BUS #(
+    .Bits(8)
+  )
+  DIG_Register_BUS_i47 (
+    .D( s17 ),
+    .C( nC_R ),
+    .en( LBL ),
+    .Q( TBL )
+  );
+  // SPL_R
   CE_PRE CE_PRE_i48 (
     .R( R_R ),
     .C( nC_R ),
@@ -3318,36 +3582,6 @@ module DIG_CounterPreset #(
     end
 endmodule
 
-module DIG_JK_FF
-#(
-    parameter Default = 1'b0
-)
-(
-   input J,
-   input C,
-   input K,
-   output Q,
-   output \~Q
-);
-    reg state;
-
-    assign Q = state;
-    assign \~Q = ~state;
-
-    always @ (posedge C) begin
-        if (~J & K)
-            state <= 1'b0;
-         else if (J & ~K)
-            state <= 1'b1;
-         else if (J & K)
-            state <= ~state;
-    end
-
-    initial begin
-        state = Default;
-    end
-endmodule
-
 
 module CE_STATE (
   input R,
@@ -3358,6 +3592,7 @@ module CE_STATE (
   output [3:0] OUT
 );
   wire s0;
+  // CYCLE
   DIG_CounterPreset #(
     .Bits(4),
     .maxValue(0)
@@ -3773,15 +4008,15 @@ module DIG_ROM_512X8_OPC (
         my_rom[322] = 8'h0;
         my_rom[323] = 8'h0;
         my_rom[324] = 8'h0;
-        my_rom[325] = 8'h17;
+        my_rom[325] = 8'h8a;
         my_rom[326] = 8'h0;
         my_rom[327] = 8'h0;
         my_rom[328] = 8'h81;
-        my_rom[329] = 8'h16;
+        my_rom[329] = 8'h89;
         my_rom[330] = 8'h0;
         my_rom[331] = 8'h7b;
         my_rom[332] = 8'h0;
-        my_rom[333] = 8'h19;
+        my_rom[333] = 8'h8c;
         my_rom[334] = 8'h0;
         my_rom[335] = 8'h0;
         my_rom[336] = 8'h0;
@@ -3789,15 +4024,15 @@ module DIG_ROM_512X8_OPC (
         my_rom[338] = 8'h0;
         my_rom[339] = 8'h0;
         my_rom[340] = 8'h0;
-        my_rom[341] = 8'h18;
+        my_rom[341] = 8'h8b;
         my_rom[342] = 8'h0;
         my_rom[343] = 8'h0;
         my_rom[344] = 8'h0;
-        my_rom[345] = 8'h1b;
+        my_rom[345] = 8'h8e;
         my_rom[346] = 8'h0;
         my_rom[347] = 8'h7c;
         my_rom[348] = 8'h0;
-        my_rom[349] = 8'h1a;
+        my_rom[349] = 8'h8d;
         my_rom[350] = 8'h0;
         my_rom[351] = 8'h0;
         my_rom[352] = 8'h0;
@@ -3805,15 +4040,15 @@ module DIG_ROM_512X8_OPC (
         my_rom[354] = 8'h0;
         my_rom[355] = 8'h0;
         my_rom[356] = 8'h0;
-        my_rom[357] = 8'h17;
+        my_rom[357] = 8'h8a;
         my_rom[358] = 8'h0;
         my_rom[359] = 8'h0;
         my_rom[360] = 8'h82;
-        my_rom[361] = 8'h16;
+        my_rom[361] = 8'h89;
         my_rom[362] = 8'h0;
         my_rom[363] = 8'h7d;
         my_rom[364] = 8'h0;
-        my_rom[365] = 8'h19;
+        my_rom[365] = 8'h8c;
         my_rom[366] = 8'h0;
         my_rom[367] = 8'h0;
         my_rom[368] = 8'h0;
@@ -3821,15 +4056,15 @@ module DIG_ROM_512X8_OPC (
         my_rom[370] = 8'h0;
         my_rom[371] = 8'h0;
         my_rom[372] = 8'h0;
-        my_rom[373] = 8'h18;
+        my_rom[373] = 8'h8b;
         my_rom[374] = 8'h0;
         my_rom[375] = 8'h0;
         my_rom[376] = 8'h0;
-        my_rom[377] = 8'h1b;
+        my_rom[377] = 8'h8e;
         my_rom[378] = 8'h0;
         my_rom[379] = 8'h7e;
         my_rom[380] = 8'h0;
-        my_rom[381] = 8'h1a;
+        my_rom[381] = 8'h8d;
         my_rom[382] = 8'h0;
         my_rom[383] = 8'h0;
         my_rom[384] = 8'h0;
@@ -4305,15 +4540,15 @@ module DIG_ROM_512X4_CON (
         my_rom[322] = 4'h0;
         my_rom[323] = 4'h0;
         my_rom[324] = 4'h0;
-        my_rom[325] = 4'h0;
+        my_rom[325] = 4'h2;
         my_rom[326] = 4'h0;
         my_rom[327] = 4'h0;
         my_rom[328] = 4'h0;
-        my_rom[329] = 4'h0;
+        my_rom[329] = 4'h2;
         my_rom[330] = 4'h0;
         my_rom[331] = 4'h0;
         my_rom[332] = 4'h0;
-        my_rom[333] = 4'h0;
+        my_rom[333] = 4'h2;
         my_rom[334] = 4'h0;
         my_rom[335] = 4'h0;
         my_rom[336] = 4'h0;
@@ -4321,15 +4556,15 @@ module DIG_ROM_512X4_CON (
         my_rom[338] = 4'h0;
         my_rom[339] = 4'h0;
         my_rom[340] = 4'h0;
-        my_rom[341] = 4'h0;
+        my_rom[341] = 4'h2;
         my_rom[342] = 4'h0;
         my_rom[343] = 4'h0;
         my_rom[344] = 4'h0;
-        my_rom[345] = 4'h0;
+        my_rom[345] = 4'h2;
         my_rom[346] = 4'h0;
         my_rom[347] = 4'h0;
         my_rom[348] = 4'h0;
-        my_rom[349] = 4'h0;
+        my_rom[349] = 4'h2;
         my_rom[350] = 4'h0;
         my_rom[351] = 4'h0;
         my_rom[352] = 4'h0;
@@ -4337,15 +4572,15 @@ module DIG_ROM_512X4_CON (
         my_rom[354] = 4'h0;
         my_rom[355] = 4'h0;
         my_rom[356] = 4'h0;
-        my_rom[357] = 4'h0;
+        my_rom[357] = 4'h2;
         my_rom[358] = 4'h0;
         my_rom[359] = 4'h0;
         my_rom[360] = 4'h0;
-        my_rom[361] = 4'h0;
+        my_rom[361] = 4'h2;
         my_rom[362] = 4'h0;
         my_rom[363] = 4'h0;
         my_rom[364] = 4'h0;
-        my_rom[365] = 4'h0;
+        my_rom[365] = 4'h2;
         my_rom[366] = 4'h0;
         my_rom[367] = 4'h0;
         my_rom[368] = 4'h0;
@@ -4353,15 +4588,15 @@ module DIG_ROM_512X4_CON (
         my_rom[370] = 4'h0;
         my_rom[371] = 4'h0;
         my_rom[372] = 4'h0;
-        my_rom[373] = 4'h0;
+        my_rom[373] = 4'h2;
         my_rom[374] = 4'h0;
         my_rom[375] = 4'h0;
         my_rom[376] = 4'h0;
-        my_rom[377] = 4'h0;
+        my_rom[377] = 4'h2;
         my_rom[378] = 4'h0;
         my_rom[379] = 4'h0;
         my_rom[380] = 4'h0;
-        my_rom[381] = 4'h0;
+        my_rom[381] = 4'h2;
         my_rom[382] = 4'h0;
         my_rom[383] = 4'h0;
         my_rom[384] = 4'h0;
@@ -4529,11 +4764,13 @@ module DIG_ROM_1024X8_INST0 (
     input sel,
     output reg [7:0] D
 );
-    reg [7:0] my_rom [0:1088];
+    reg [7:0] my_rom [0:1016];
 
     always @ (*) begin
         if (~sel)
             D = 8'hz;
+        else if (A > 10'h3f8)
+            D = 8'h0;
         else
             D = my_rom[A];
     end
@@ -5556,78 +5793,6 @@ module DIG_ROM_1024X8_INST0 (
         my_rom[1014] = 8'h0;
         my_rom[1015] = 8'h0;
         my_rom[1016] = 8'h20;
-        my_rom[1017] = 8'h0;
-        my_rom[1018] = 8'h0;
-        my_rom[1019] = 8'h0;
-        my_rom[1020] = 8'h0;
-        my_rom[1021] = 8'h0;
-        my_rom[1022] = 8'h0;
-        my_rom[1023] = 8'h0;
-        my_rom[1024] = 8'h99;
-        my_rom[1025] = 8'h0;
-        my_rom[1026] = 8'h0;
-        my_rom[1027] = 8'h0;
-        my_rom[1028] = 8'h0;
-        my_rom[1029] = 8'h0;
-        my_rom[1030] = 8'h0;
-        my_rom[1031] = 8'h0;
-        my_rom[1032] = 8'h98;
-        my_rom[1033] = 8'h8c;
-        my_rom[1034] = 8'h8e;
-        my_rom[1035] = 8'h8f;
-        my_rom[1036] = 8'h90;
-        my_rom[1037] = 8'h7a;
-        my_rom[1038] = 8'h0;
-        my_rom[1039] = 8'h0;
-        my_rom[1040] = 8'h1b;
-        my_rom[1041] = 8'h2a;
-        my_rom[1042] = 8'h4f;
-        my_rom[1043] = 8'h5a;
-        my_rom[1044] = 8'h66;
-        my_rom[1045] = 8'h73;
-        my_rom[1046] = 8'h0;
-        my_rom[1047] = 8'h0;
-        my_rom[1048] = 8'h7c;
-        my_rom[1049] = 8'h0;
-        my_rom[1050] = 8'h0;
-        my_rom[1051] = 8'h0;
-        my_rom[1052] = 8'h0;
-        my_rom[1053] = 8'h0;
-        my_rom[1054] = 8'h0;
-        my_rom[1055] = 8'h0;
-        my_rom[1056] = 8'h4;
-        my_rom[1057] = 8'h0;
-        my_rom[1058] = 8'h0;
-        my_rom[1059] = 8'h0;
-        my_rom[1060] = 8'h0;
-        my_rom[1061] = 8'h4;
-        my_rom[1062] = 8'h0;
-        my_rom[1063] = 8'h0;
-        my_rom[1064] = 8'h41;
-        my_rom[1065] = 8'h3a;
-        my_rom[1066] = 8'h36;
-        my_rom[1067] = 8'h23;
-        my_rom[1068] = 8'h0;
-        my_rom[1069] = 8'h0;
-        my_rom[1070] = 8'h0;
-        my_rom[1071] = 8'h0;
-        my_rom[1072] = 8'h41;
-        my_rom[1073] = 8'h3a;
-        my_rom[1074] = 8'h36;
-        my_rom[1075] = 8'h9b;
-        my_rom[1076] = 8'h0;
-        my_rom[1077] = 8'h0;
-        my_rom[1078] = 8'h0;
-        my_rom[1079] = 8'h0;
-        my_rom[1080] = 8'haa;
-        my_rom[1081] = 8'h0;
-        my_rom[1082] = 8'h0;
-        my_rom[1083] = 8'h0;
-        my_rom[1084] = 8'h0;
-        my_rom[1085] = 8'h0;
-        my_rom[1086] = 8'h0;
-        my_rom[1087] = 8'h0;
-        my_rom[1088] = 8'hab;
     end
 endmodule
 
@@ -5636,12 +5801,12 @@ module DIG_ROM_128X8_INST1 (
     input sel,
     output reg [7:0] D
 );
-    reg [7:0] my_rom [0:64];
+    reg [7:0] my_rom [0:118];
 
     always @ (*) begin
         if (~sel)
             D = 8'hz;
-        else if (A > 7'h40)
+        else if (A > 7'h76)
             D = 8'h0;
         else
             D = my_rom[A];
@@ -5713,6 +5878,60 @@ module DIG_ROM_128X8_INST1 (
         my_rom[62] = 8'h0;
         my_rom[63] = 8'h0;
         my_rom[64] = 8'hab;
+        my_rom[65] = 8'h0;
+        my_rom[66] = 8'h0;
+        my_rom[67] = 8'h0;
+        my_rom[68] = 8'h0;
+        my_rom[69] = 8'h0;
+        my_rom[70] = 8'h0;
+        my_rom[71] = 8'h0;
+        my_rom[72] = 8'had;
+        my_rom[73] = 8'h0;
+        my_rom[74] = 8'h0;
+        my_rom[75] = 8'h0;
+        my_rom[76] = 8'h0;
+        my_rom[77] = 8'h4;
+        my_rom[78] = 8'hac;
+        my_rom[79] = 8'h0;
+        my_rom[80] = 8'h41;
+        my_rom[81] = 8'hae;
+        my_rom[82] = 8'h0;
+        my_rom[83] = 8'h0;
+        my_rom[84] = 8'h0;
+        my_rom[85] = 8'h4;
+        my_rom[86] = 8'hac;
+        my_rom[87] = 8'h0;
+        my_rom[88] = 8'h41;
+        my_rom[89] = 8'haf;
+        my_rom[90] = 8'h0;
+        my_rom[91] = 8'h0;
+        my_rom[92] = 8'h0;
+        my_rom[93] = 8'h4;
+        my_rom[94] = 8'hac;
+        my_rom[95] = 8'h0;
+        my_rom[96] = 8'h3c;
+        my_rom[97] = 8'h37;
+        my_rom[98] = 8'hb0;
+        my_rom[99] = 8'h0;
+        my_rom[100] = 8'h0;
+        my_rom[101] = 8'h4;
+        my_rom[102] = 8'hac;
+        my_rom[103] = 8'h0;
+        my_rom[104] = 8'h3c;
+        my_rom[105] = 8'h37;
+        my_rom[106] = 8'hb1;
+        my_rom[107] = 8'h0;
+        my_rom[108] = 8'h0;
+        my_rom[109] = 8'h4;
+        my_rom[110] = 8'hac;
+        my_rom[111] = 8'h0;
+        my_rom[112] = 8'h3c;
+        my_rom[113] = 8'h37;
+        my_rom[114] = 8'hb2;
+        my_rom[115] = 8'h0;
+        my_rom[116] = 8'h0;
+        my_rom[117] = 8'h4;
+        my_rom[118] = 8'hac;
     end
 endmodule
 
@@ -6455,13 +6674,13 @@ module DIG_ROM_256X32_ROM32 (
         my_rom[169] = 32'h700f000;
         my_rom[170] = 32'h80a218;
         my_rom[171] = 32'ha000;
-        my_rom[172] = 32'h0;
-        my_rom[173] = 32'h0;
-        my_rom[174] = 32'h0;
-        my_rom[175] = 32'h0;
-        my_rom[176] = 32'h0;
-        my_rom[177] = 32'h0;
-        my_rom[178] = 32'h0;
+        my_rom[172] = 32'h800200;
+        my_rom[173] = 32'he0000018;
+        my_rom[174] = 32'h5018;
+        my_rom[175] = 32'h6018;
+        my_rom[176] = 32'h1018;
+        my_rom[177] = 32'h2018;
+        my_rom[178] = 32'h3018;
         my_rom[179] = 32'h0;
         my_rom[180] = 32'h0;
         my_rom[181] = 32'h0;
@@ -6547,12 +6766,12 @@ module DIG_ROM_256X12_ROM12 (
     input sel,
     output reg [11:0] D
 );
-    reg [11:0] my_rom [0:171];
+    reg [11:0] my_rom [0:178];
 
     always @ (*) begin
         if (~sel)
             D = 12'hz;
-        else if (A > 8'hab)
+        else if (A > 8'hb2)
             D = 12'h0;
         else
             D = my_rom[A];
@@ -6731,6 +6950,13 @@ module DIG_ROM_256X12_ROM12 (
         my_rom[169] = 12'ha00;
         my_rom[170] = 12'h880;
         my_rom[171] = 12'h810;
+        my_rom[172] = 12'hc00;
+        my_rom[173] = 12'h80;
+        my_rom[174] = 12'h80;
+        my_rom[175] = 12'h80;
+        my_rom[176] = 12'h80;
+        my_rom[177] = 12'h80;
+        my_rom[178] = 12'h80;
     end
 endmodule
 
@@ -6770,18 +6996,21 @@ module CE_M_CU (
   input IRQ_U, // Interrupt Request
   input NMI_U, // Non-Maskable Interrupt
   input ABT_U, // Abort
+  input BY_U, // DIV State Machine Busy flag
   output [1:0] ANRI_U,
   output INT_U, // Interrupt
-  output LDIR, // Load IR
+  output LDIR_U, // Load IR
   output [9:0] \A-CTRL_U , // ALU Control
   output [31:0] \R-CTRL_U , // Register Control
   output [3:0] SPO_U, // SP Offset
   output [2:0] \M-CTRL_U , // Memory Control
-  output [2:0] PCO_U // PC Offset
+  output [2:0] PCO_U, // PC Offset
+  output WAI_U, // Wait
+  output AA_U // Active Abort
 
 );
   wire INT_U_temp;
-  wire LDIR_temp;
+  wire LDIR_U_temp;
   wire [5:0] FL;
   wire [7:0] OPC;
   wire s0;
@@ -6789,7 +7018,7 @@ module CE_M_CU (
   wire s1;
   wire s2;
   wire NMI;
-  wire ABT;
+  wire AA_U_temp;
   wire RES;
   wire s3;
   wire s4;
@@ -6822,7 +7051,7 @@ module CE_M_CU (
   wire s24;
   wire s25;
   wire s26;
-  wire \WAIT ;
+  wire WAI_U_temp;
   wire COND;
   wire s27;
   wire [3:0] s28;
@@ -6882,9 +7111,9 @@ module CE_M_CU (
   assign s16 = FL[2];
   assign s17 = FL[3];
   assign CLR = (s46[9] | R_U);
-  assign s1 = (~ (FLI_U[2] | NMI | ABT | RES) & IRQ_U);
-  assign s2 = (~ (NMI | ABT | RES) & NMI_U);
-  assign s3 = (~ (ABT | RES) & ABT_U);
+  assign s1 = (~ (FLI_U[2] | NMI | AA_U_temp | RES) & IRQ_U);
+  assign s2 = (~ (NMI | AA_U_temp | RES) & NMI_U);
+  assign s3 = (~ (AA_U_temp | RES) & ABT_U);
   // IR
   DIG_Register_BUS #(
     .Bits(8)
@@ -6892,14 +7121,14 @@ module CE_M_CU (
   DIG_Register_BUS_i0 (
     .D( DI_U ),
     .C( nC_U ),
-    .en( LDIR_temp ),
+    .en( LDIR_U_temp ),
     .Q( OPC )
   );
   Mux_16x1 Mux_16x1_i1 (
     .sel( CONS ),
     .in_0( 1'b1 ),
     .in_1( 1'b0 ),
-    .in_2( 1'b0 ),
+    .in_2( BY_U ),
     .in_3( 1'b0 ),
     .in_4( s14 ),
     .in_5( s15 ),
@@ -6919,7 +7148,7 @@ module CE_M_CU (
     .Bits(8)
   )
   Mux_2x1_NBits_i2 (
-    .sel( LDIR_temp ),
+    .sel( LDIR_U_temp ),
     .in_0( OPC ),
     .in_1( DI_U ),
     .out( s49 )
@@ -7004,7 +7233,7 @@ module CE_M_CU (
     .D( s35 )
   );
   assign s36 = CY[0];
-  assign \WAIT  = (CONS[0] & CONS[1] & ~ CONS[2] & ~ CONS[3]);
+  assign WAI_U_temp = (CONS[0] & CONS[1] & ~ CONS[2] & ~ CONS[3]);
   // RES
   DIG_ROM_2X8_RES DIG_ROM_2X8_RES_i13 (
     .A( s36 ),
@@ -7019,7 +7248,7 @@ module CE_M_CU (
     .J( s10 ),
     .K( CLR ),
     .R( CLR ),
-    .Q( ABT ),
+    .Q( AA_U_temp ),
     .\~Q ( s13 )
   );
   assign CABT = (s13 & s9);
@@ -7049,14 +7278,14 @@ module CE_M_CU (
   );
   assign s6 = (~ s4 & \END  & s5);
   assign s8 = (~ s4 & \END  & s7);
-  assign s11 = (O2C & (ABT | \END ));
+  assign s11 = (O2C & (AA_U_temp | \END ));
   assign s12 = (\END  & OP2);
   assign INTQ = ((s5 | s7) & ~ O2C & ~ IRQ & ~ NMI);
-  assign COND = (~ \WAIT  & s46[8] & s26);
+  assign COND = (~ WAI_U_temp & s46[8] & s26);
   assign s27 = (~ (CABT | INTQ) & COND);
   assign s31 = (CABT | COND | \END );
-  assign s29 = ((SKIP & ~ (CABT | INTQ)) & ~ \WAIT );
-  assign ACY0 = (CY0 & ~ (IRQ | NMI | ABT | RES));
+  assign s29 = ((SKIP & ~ (CABT | INTQ)) & ~ WAI_U_temp);
+  assign ACY0 = (CY0 & ~ (IRQ | NMI | AA_U_temp | RES));
   Mux_2x1_NBits #(
     .Bits(8)
   )
@@ -7075,9 +7304,9 @@ module CE_M_CU (
     .in_1( s37 ),
     .out( s42 )
   );
-  assign s39 = (IRQ | NMI | ABT);
+  assign s39 = (IRQ | NMI | AA_U_temp);
   Mux_2x1 Mux_2x1_i20 (
-    .sel( LDIR_temp ),
+    .sel( LDIR_U_temp ),
     .in_0( OP2 ),
     .in_1( O2C ),
     .out( s50 )
@@ -7087,7 +7316,7 @@ module CE_M_CU (
   PriorityEncoder2 PriorityEncoder2_i21 (
     .in0( s52 ),
     .in1( NMI ),
-    .in2( ABT ),
+    .in2( AA_U_temp ),
     .in3( RES ),
     .num( s53 ),
     .any( INT_U_temp )
@@ -7106,7 +7335,7 @@ module CE_M_CU (
     .Bits(3)
   )
   Mux_2x1_NBits_i23 (
-    .sel( ABT ),
+    .sel( AA_U_temp ),
     .in_0( s59 ),
     .in_1( s58 ),
     .out( s60 )
@@ -7140,7 +7369,7 @@ module CE_M_CU (
     .in_1( 4'b101 ),
     .out( s28 )
   );
-  assign LDIR_temp = (s29 | ACY0);
+  assign LDIR_U_temp = (s29 | ACY0);
   Mux_2x1_NBits #(
     .Bits(8)
   )
@@ -7228,7 +7457,9 @@ module CE_M_CU (
     .out( PCO_U )
   );
   assign INT_U = INT_U_temp;
-  assign LDIR = LDIR_temp;
+  assign LDIR_U = LDIR_U_temp;
+  assign WAI_U = WAI_U_temp;
+  assign AA_U = AA_U_temp;
 endmodule
 module DIG_PinControl
 #(
@@ -7282,19 +7513,24 @@ module CE_M_CPU_TOP (
   wire [2:0] s8;
   wire s9;
   wire s10;
-  wire s11;
-  wire [7:0] s12;
-  wire [15:0] s13;
-  wire [9:0] s14;
-  wire [15:0] s15;
+  wire [7:0] s11;
+  wire [15:0] s12;
+  wire [9:0] s13;
+  wire AA;
+  wire [15:0] s14;
+  wire BY;
   wire [7:0] DI;
-  wire [7:0] s16;
-  wire [1:0] s17;
-  wire [31:0] s18;
-  wire [2:0] s19;
-  wire [3:0] s20;
-  wire [7:0] s21;
+  wire [7:0] s15;
+  wire [1:0] s16;
+  wire [31:0] s17;
+  wire [2:0] s18;
+  wire [3:0] s19;
+  wire [7:0] s20;
+  wire s21;
   wire s22;
+  wire s23;
+  wire s24;
+  wire s25;
   assign s0 = (BE_CPU & ~ nSOB_CPU);
   assign s1 = (BE_CPU & ~ nABT_CPU);
   assign s2 = (BE_CPU & ~ nNMI_CPU);
@@ -7302,7 +7538,7 @@ module CE_M_CPU_TOP (
   assign s4 = ~ nRDY_CPU;
   CE_LFSR CE_LFSR_i0 (
     .CLK( C_CPU ),
-    .OUT( s16 )
+    .OUT( s15 )
   );
   DIG_D_FF_1bit #(
     .Default(0)
@@ -7321,31 +7557,34 @@ module CE_M_CPU_TOP (
   assign nC = ~ C;
   assign RnW_CPU_temp = (BE_CPU & s7[0]);
   CE_M_ALU CE_M_ALU_i3 (
-    .R_A( R_CPU ),
-    .nC_A( nC ),
-    .ALA_A( s12 ),
-    .ALB_A( s13 ),
-    .A_CTRL_A( s14 ),
+    .ALA_A( s11 ),
+    .ALB_A( s12 ),
+    .A_CTRL_A( s13 ),
     .SOB_A( s0 ),
     .CIB_A( s9 ),
-    .ALO_A( s15 ),
-    .FLO_A( s6 )
+    .R_A( R_CPU ),
+    .nC_A( nC ),
+    .C_A( C ),
+    .ABT_A( AA ),
+    .ALO_A( s14 ),
+    .FLO_A( s6 ),
+    .BY_A( BY )
   );
   CE_M_REGS CE_M_REGS_i4 (
     .R_R( R_CPU ),
     .nC_R( nC ),
     .DI_R( DI ),
-    .ALUI_R( s15 ),
-    .RNDI_R( s16 ),
+    .ALUI_R( s14 ),
+    .RNDI_R( s15 ),
     .FLI_R( s5 ),
-    .ANRI_R( s17 ),
-    .R_CTRL_R( s18 ),
-    .PCO_R( s19 ),
-    .SPO_R( s20 ),
-    .ALA_R( s12 ),
-    .ALB_R( s13 ),
-    .DO_R( s21 ),
-    .VPA_R( VPA_CPU ),
+    .ANRI_R( s16 ),
+    .R_CTRL_R( s17 ),
+    .PCO_R( s18 ),
+    .SPO_R( s19 ),
+    .ALA_R( s11 ),
+    .ALB_R( s12 ),
+    .DO_R( s20 ),
+    .VPA_R( s21 ),
     .VBA_R( VBA_CPU ),
     .VSA_R( VSA_CPU_temp ),
     .VVA_R( s10 ),
@@ -7360,19 +7599,22 @@ module CE_M_CPU_TOP (
     .IRQ_U( s3 ),
     .NMI_U( s2 ),
     .ABT_U( s1 ),
-    .ANRI_U( s17 ),
+    .BY_U( BY ),
+    .ANRI_U( s16 ),
     .INT_U( s9 ),
-    .LDIR( s11 ),
-    .\A-CTRL_U ( s14 ),
-    .\R-CTRL_U ( s18 ),
-    .SPO_U( s20 ),
+    .LDIR_U( s22 ),
+    .\A-CTRL_U ( s13 ),
+    .\R-CTRL_U ( s17 ),
+    .SPO_U( s19 ),
     .\M-CTRL_U ( s8 ),
-    .PCO_U( s19 )
+    .PCO_U( s18 ),
+    .WAI_U( s23 ),
+    .AA_U( AA )
   );
   assign s7 = ~ s8;
   assign VVA_CPU = (s10 | (VSA_CPU_temp & s9));
-  assign VDA_CPU = ~ s11;
-  assign s22 = ~ RnW_CPU_temp;
+  assign s24 = ~ RnW_CPU_temp;
+  assign s25 = (BY | s23);
   assign s5[2:0] = s6[2:0];
   assign s5[3] = s7[2];
   assign s5[7:4] = s6[6:3];
@@ -7380,11 +7622,13 @@ module CE_M_CPU_TOP (
     .Bits(8)
   )
   DIG_PinControl_i6 (
-    .wr( s21 ),
-    .oe( s22 ),
+    .wr( s20 ),
+    .oe( s24 ),
     .rd( DI ),
     .pin( D_CPU )
   );
+  assign VDA_CPU = (~ s22 & ~ s25);
+  assign VPA_CPU = (s21 & ~ s25);
   assign nMLB_CPU = s7[1];
   assign RnW_CPU = RnW_CPU_temp;
   assign VSA_CPU = VSA_CPU_temp;

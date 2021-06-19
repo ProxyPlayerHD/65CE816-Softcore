@@ -1093,3 +1093,51 @@
 6. x
 7. x
 8. x
+137 - MOD/DIV #
+2. Do an <ALU> Operation with A and (PC - 1)
+3. ABSOLUTELY NOTHING
+4. ABSOLUTELY NOTHING
+5. Check <bit>, Jump to 5. if set
+6. Load into A from ALU; ----SK0
+7. x
+8. x
+138 - MOD/DIV bp
+2. Load into TBL from (PC - 1)
+3. Do an <ALU> Operation with A and (BL/B)
+4. ABSOLUTELY NOTHING
+5. Check <bit>, Jump to 5. if set
+6. Load into A from ALU; ----SK0
+7. x
+8. x
+139 - MOD/DIV bp,x
+2. Load into TBL from (PC - 1)
+3. Do an <ALU> Operation with A and (BL/B+X)
+4. ABSOLUTELY NOTHING
+5. Check <bit>, Jump to 5. if set
+6. Load into A from ALU; ----SK0
+7. x
+8. x
+140 - MOD/DIV a
+2. Load into TAL from (PC - 2)
+3. Load into TAH from (PC - 1)
+4. Do an <ALU> Operation with A and (TA)
+5. Check <bit>, Jump to 5. if set
+6. Load into A from ALU; ----SK0
+7. x
+8. x
+141 - MOD/DIV a,x
+2. Load into TAL from (PC - 2)
+3. Load into TAH from (PC - 1)
+4. Do an <ALU> Operation with A and (TA+X)
+5. Check <bit>, Jump to 5. if set
+6. Load into A from ALU; ----SK0
+7. x
+8. x
+142 - MOD/DIV a,y
+2. Load into TAL from (PC - 2)
+3. Load into TAH from (PC - 1)
+4. Do an <ALU> Operation with A and (TA+Y)
+5. Check <bit>, Jump to 5. if set
+6. Load into A from ALU; ----SK0
+7. x
+8. x

@@ -37,12 +37,12 @@ MOD		- Divides a value from Memory by A, remainder stored in A. (the Carry being
 	
 	Opcode	Addressing		Mnemonic		Bytes	Cyles
 	-----------------------------------------------------
-	5C 49	Immediate		DIV #nn			2+1		2+1+?
-	5C 45	Base Page		DIV nn			2+1		3+1+?
-	5C 55	Base Page X		DIV nn,X		2+1		3+1+?
-	5C 4D	Absolute		DIV nnnn		3+1		4+1+?
-	5C 5D	Absolute X		DIV nnnn,X		3+1		4+1+?
-	5C 59	Absolute Y		MUL nnnn,Y		3+1		4+1+?
+	5C 49	Immediate		MOD #nn			2+1		11+1
+	5C 45	Base Page		MOD nn			2+1		12+1
+	5C 55	Base Page X		MOD nn,X		2+1		12+1
+	5C 4D	Absolute		MOD nnnn		3+1		13+1
+	5C 5D	Absolute X		MOD nnnn,X		3+1		13+1
+	5C 59	Absolute Y		MOD nnnn,Y		3+1		13+1
 
 
 DIV		- Divides a value from Memory by A, result stored in A (the Carry being 1 indicates that the Low byte (aka MOD result) is not equal to 0)
@@ -52,12 +52,12 @@ DIV		- Divides a value from Memory by A, result stored in A (the Carry being 1 i
 	
 	Opcode	Addressing		Mnemonic		Bytes	Cyles
 	-----------------------------------------------------
-	5C 69	Immediate		DIV #nn			2+1		2+1+?
-	5C 65	Base Page		DIV nn			2+1		3+1+?
-	5C 75	Base Page X		DIV nn,X		2+1		3+1+?
-	5C 6D	Absolute		DIV nnnn		3+1		4+1+?
-	5C 7D	Absolute X		DIV nnnn,X		3+1		4+1+?
-	5C 79	Absolute Y		MUL nnnn,Y		3+1		4+1+?
+	5C 69	Immediate		DIV #nn			2+1		11+1
+	5C 65	Base Page		DIV nn			2+1		12+1
+	5C 75	Base Page X		DIV nn,X		2+1		12+1
+	5C 6D	Absolute		DIV nnnn		3+1		13+1
+	5C 7D	Absolute X		DIV nnnn,X		3+1		13+1
+	5C 79	Absolute Y		DIV nnnn,Y		3+1		13+1
 
 
 LWR		- "Logic shift Word Right", Shifts all bits 1 to the right, 0 into bit 15, and bit 0 into Carry

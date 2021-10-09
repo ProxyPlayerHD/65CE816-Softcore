@@ -1,7 +1,7 @@
-# 65CE02-Softcore
-This is a 65CE02 Compatible Softcore with added Features and Instructions.
+# 65CE816-Softcore
+This is a 65CE02 Compatible Softcore with additional Features and Instructions. A lot of inspiration for the added features was taken from the 65C816, making this softcore a kind of hybrid between the 2 CPUSs, hence the name.
 
-It's currently not fully tested but should still be mostly functional. I'm Testing it on my Cyclone II Powered Altera DE2 Dev Board. The CPU takes up around 2700 Logic Elements and seems to run fine at 25MHz.
+It's currently not fully tested but should still be mostly functional. I'm Testing it on my Cyclone II Powered Altera DE2 Dev Board. The CPU takes up <3000 Logic Elements and seems to run fine at 25MHz.
 
 I mostly designed it based on the [Datasheet](http://archive.6502.org/datasheets/mos_65ce02_mpu.pdf) and the [C65 Specification](https://github.com/ProxyPlayerHD/65CE02-Softcore/blob/main/C65%20System%20Specifications%20Preliminary%201991.pdf).
 
